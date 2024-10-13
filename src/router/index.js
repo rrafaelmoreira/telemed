@@ -5,6 +5,10 @@ import AuthView from '../views/AuthView.vue';
 const routes = [
   {
     path: '/',
+    redirect: '/auth' // Redireciona a rota raiz para a página de login
+  },
+  {
+    path: '/home',
     name: 'Home',
     component: HomeView
   },

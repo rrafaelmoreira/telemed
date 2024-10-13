@@ -45,15 +45,15 @@ export default {
     };
   },
   methods: {
-    handleLogin() {
-      if (AuthController.login(this.loginEmail, this.loginPassword)) {
+    async handleLogin() {
+      if (await AuthController.login(this.loginEmail, this.loginPassword)) {
         this.$router.push({ name: 'Home' });
       } else {
         alert('Login failed');
       }
     },
-    handleRegister() {
-      if (AuthController.register(this.registerEmail, this.registerPassword)) {
+    async handleRegister() {
+      if (await AuthController.register(this.registerEmail, this.registerPassword)) {
         alert('Registration successful');
       } else {
         alert('Registration failed: User already exists');

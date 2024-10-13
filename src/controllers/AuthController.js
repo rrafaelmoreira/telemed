@@ -1,18 +1,21 @@
-const users = [];
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default {
-  login(email, password) {
+  async login(email, password) {
     // Lógica de login
     console.log('Login:', email, password);
-    const user = users.find(user => user.email === email && user.password === password);
-    return !!user; // Retorna true se o usuário for encontrado, caso contrário, false
+    const q = query(collection(db, 'users'), where('email', '==', email), where('password', '==', password));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty; // Retorna true se o usuário for encontrado, caso contrário, false
   },
-  register(email, password) {
+  async register(email, password) {
     // Lógica de registro
     console.log('Register:', email, password);
-    const userExists = users.some(user => user.email === email);
-    if (!userExists) {
-      users.push({ email, password });
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      await addDoc(collection(db, 'users'), { email, password });
       return true; // Registro bem-sucedido
     }
     return false; // Usuário já existe
