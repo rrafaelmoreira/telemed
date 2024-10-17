@@ -9,21 +9,23 @@
   </template>
   
   <script>
-  export default {
-    name: 'JitsiMeet',
-    data() {
-      return {
-        roomName: 'my-custom-room', // Nome da sala de videoconferência
-        domain: '35.196.247.119', // Domínio do servidor Jitsi
-      };
+export default {
+  name: 'JitsiMeet',
+  data() {
+    return {
+      roomName: 'my-custom-room', // Nome da sala de videoconferência
+      domain: 'ec2-34-229-236-247.compute-1.amazonaws.com', // Domínio do servidor Jitsi
+    };
+  },
+  computed: {
+    jitsiUrl() {
+      const url = `https://${this.domain}/${this.roomName}`;
+      console.log(url); // Adiciona o console.log aqui para verificar a URL
+      return url;
     },
-    computed: {
-      jitsiUrl() {
-        return `https://${this.domain}/${this.roomName}`;
-      },
-    },
-  };
-  </script>
+  },
+};
+</script>
   
   <style scoped>
   .jitsi-container {
