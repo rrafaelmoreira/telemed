@@ -1,0 +1,149 @@
+
+<template>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-primary text-white">Cadastro</div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="user-type" class="form-label">Tipo de usuário:</label>
+              <select class="form-select" id="user-type" v-model="userType">
+                <option value="cliente">Cliente</option>
+                <option value="medico">Médico</option>
+              </select>
+            </div>
+
+            <form @submit.prevent="handleRegister">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" class="form-control" id="email" v-model="user.email" required placeholder="Digite seu email">
+              </div>
+
+              <div class="mb-3">
+                <label for="first-name" class="form-label">Nome:</label>
+                <input type="text" class="form-control" id="first-name" v-model="user.firstName" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="last-name" class="form-label">Sobrenome:</label>
+                <input type="text" class="form-control" id="last-name" v-model="user.lastName" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="social-name" class="form-label">Nome Social (Opcional):</label>
+                <input type="text" class="form-control" id="social-name" v-model="user.socialName">
+              </div>
+
+              <div class="mb-3">
+                <label for="gender" class="form-label">Gênero:</label>
+                <select class="form-select" id="gender" v-model="user.gender">
+                  <option>Masculino</option>
+                  <option>Feminino</option>
+                  <option>Não-Binário</option>
+                  <option>Prefiro não informar</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="cpf" class="form-label">CPF:</label>
+                <input type="text" v-mask="'###.###.###-##'" v-model="user.cpf" class="form-control" required placeholder="xxx.xxx.xxx-xx" @input="validateCPF" />
+              </div>
+
+              <div v-if="userType === 'medico'">
+                <div class="mb-3">
+                  <label for="crm" class="form-label">CRM:</label>
+                  <input type="text" class="form-control" id="crm" v-model="user.crm" required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Senha:</label>
+                <input type="password" class="form-control" id="password" v-model="user.password" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="confirm-password" class="form-label">Confirmar Senha:</label>
+                <input type="password" class="form-control" id="confirm-password" v-model="user.confirmPassword" required>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">Registrar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import { auth } from '@/firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { db } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+
+
+
+export default {
+  name: 'RegisterPage',
+  data() {
+    return {
+      userType: 'cliente',
+      user: {
+        firstName: '',
+        lastName: '',
+        socialName: '',
+        gender: '',
+        cpf: '',
+        crm: '',
+        password: '',
+        confirmPassword: ''
+      }
+    };
+  },
+  methods: {
+    validateCPF() {
+      // Removendo caracteres não numéricos
+      this.user.cpf = this.user.cpf.replace(/\D/g, '');
+      // Limitando a 11 dígitos
+      this.user.cpf = this.user.cpf.slice(0, 11);
+    },
+    async handleRegister() {
+      if (this.user.password !== this.user.confirmPassword) {
+        alert('As senhas não coincidem');
+        return;
+      }
+      try {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth, 
+          this.user.email, 
+          this.user.password
+        );
+
+        // Atualizar o perfil (Opcional)
+        await updateProfile(userCredential.user, {
+          displayName: this.user.firstName + ' ' + this.user.lastName
+        });
+
+        // Armazenar detalhes adicionais em Firestore ou em Custom Claims
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          firstName: this.user.firstName,
+          lastName: this.user.lastName,
+          socialName: this.user.socialName,
+          gender: this.user.gender,
+          cpf: this.user.cpf,
+          userType: this.userType,
+          crm: this.userType === 'medico' ? this.user.crm : null
+        });
+
+        console.log('Usuário registrado com sucesso:', userCredential.user);
+        // Redirecionar para a página apropriada com base no tipo de usuário
+        this.$router.push(this.userType === 'medico' ? '/dashboard-medico' : '/dashboard-cliente');
+      } catch (error) {
+        console.error('Erro ao registrar usuário:', error);
+        alert('Erro ao registrar: ' + error.message);
+      }
+    }
+  }
+};
+</script>
+
