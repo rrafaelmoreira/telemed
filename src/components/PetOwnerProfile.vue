@@ -78,7 +78,7 @@
 
 
 <script>
-import { ref, onMounted, reactive,computed } from 'vue';
+import { ref, onMounted, reactive,computed,watch  } from 'vue';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/firebase';
 import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
@@ -106,16 +106,7 @@ export default {
     const editMode = ref(false);        // Controla o modo de edição do perfil
     const saveSuccess = ref(false);     // Indica se as alterações foram salvas com sucesso
     const showPetProfile = ref(false);
-    // Carrega os dados do usuário e dos pets ao montar o componente
-    onMounted(async () => {
-    if (auth.currentUser) {
-        userProfile.uid = auth.currentUser.uid;
-        await fetchUserData(userProfile.uid);
-        await fetchPets(userProfile.uid);
-    } else {
-        console.error("Usuário não autenticado ou indisponível");
-    }
-});
+
     // Busca os dados do usuário
     const fetchUserData = async (uid) => {
     const userRef = doc(db, "users", uid);
@@ -127,6 +118,31 @@ export default {
     }
 };
 
+   // Busca os dados dos pets
+   const fetchPets = async (uid) => {
+      const petsCollection = collection(db, `users/${uid}/pets`);
+      const petSnapshot = await getDocs(petsCollection);
+      pets.value = petSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    };
+
+    // Watcher para monitorar a mudança da aba selecionada
+    watch(showSection, async (newSection) => {
+      if (newSection === 'pets') {      // Se a aba for "pets"
+        await fetchPets(userProfile.uid); // Carrega os pets do usuário
+      }
+    });
+
+
+    // Carrega os dados do usuário e dos pets ao montar o componente
+    onMounted(async () => {
+    if (auth.currentUser) {
+        userProfile.uid = auth.currentUser.uid;
+        await fetchUserData(userProfile.uid);
+        await fetchPets(userProfile.uid);
+    } else {
+        console.error("Usuário não autenticado ou indisponível");
+    }
+});
     
     // Validação dos campos do formulário
     const errorMessages = reactive({
@@ -136,12 +152,7 @@ export default {
       cpf: false
     });
 
-    // Busca os dados dos pets
-    const fetchPets = async (uid) => {
-      const petsCollection = collection(db, `users/${uid}/pets`);
-      const petSnapshot = await getDocs(petsCollection);
-      pets.value = petSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    };
+    
 
     // Alterna o modo de edição
     const toggleEditMode = () => {
