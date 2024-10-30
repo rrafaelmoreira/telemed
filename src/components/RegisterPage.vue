@@ -136,8 +136,9 @@ export default {
         });
 
         console.log('Usuário registrado com sucesso:', userCredential.user);
-        // Redirecionar para a página apropriada com base no tipo de usuário
-        this.$router.push(this.userType === 'medico' ? '/dashboard-medico' : '/dashboard-cliente');
+      // Redirecionar para a página Home
+     this.$router.push('/home');
+       // this.$router.push(this.userType === 'medico' ? '/dashboard-medico' : '/dashboard-cliente');
       } catch (error) {
         console.error('Erro ao registrar usuário:', error);
         alert('Erro ao registrar: ' + error.message);

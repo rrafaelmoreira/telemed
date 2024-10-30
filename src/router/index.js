@@ -4,7 +4,7 @@ import LoginPage from '../components/LoginPage.vue';
 import RegisterPage from '../components/RegisterPage.vue';
 import JitsiMeet from '../components/JitsiMeet.vue';
 import ForgotPasswordPage from '../components/ForgotPasswordPage.vue';
-import DoctorDashboard from '../components/DoctorDashboard.vue';
+
 import DoctorAgenda from '../components/DoctorAgenda.vue';
 import DoctorPatients from '../components/DoctorPatients.vue';
 import DoctorConsultations from '../components/DoctorConsultations.vue';
@@ -34,7 +34,6 @@ const routes = [
   { path: '/jitsi', name: 'Jitsi', component: JitsiMeet },
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPasswordPage },
   { path: '/home', name: 'Home', component: Home,   meta: { requiresAuth: true }   } ,// Adicionando a rota para Home
-  { path: '/dashboard', name: 'Dashboard', component: DoctorDashboard,  meta: { requiresAuth: true } },
   { path: '/agenda', name: 'Agenda', component: DoctorAgenda, meta: { requiresAuth: true } },
   { path: '/patients', name: 'Patients', component: DoctorPatients },
   { path: '/consultations', name: 'Consultations', component: DoctorConsultations,meta: { requiresAuth: true }  },
@@ -67,4 +66,3 @@ router.beforeEach((to, from, next) => {
 
 
 export default router;
-

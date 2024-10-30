@@ -1,13 +1,23 @@
 <template>
     <div class="sidebar">
       <div class="list-group">
-        <router-link to="/dashboard" class="list-group-item list-group-item-action">Dashboard</router-link>
-        <router-link to="/agenda" class="list-group-item list-group-item-action">Agenda</router-link>
-        <router-link to="/pacientes" class="list-group-item list-group-item-action">Pacientes</router-link>
-        <router-link to="/consultas" class="list-group-item list-group-item-action">Consultas</router-link>
-        <router-link to="/criar-reuniao" class="list-group-item list-group-item-action">Criar Reunião</router-link>
+        <div v-if="userType === 'medico'" class="list-group">
+          <router-link to="/perfil-medico" class="list-group-item list-group-item-action">Meu Perfil</router-link>
+          <router-link to="/agenda" class="list-group-item list-group-item-action">Minha Agenda</router-link>
+          <router-link to="/pacientes" class="list-group-item list-group-item-action"> Meus Pacientes</router-link>
+          <router-link to="/criar-reuniao" class="list-group-item list-group-item-action">Criar Reunião</router-link>
+
+        </div>
+        <div v-else-if="userType === 'cliente'" class="list-group">
+          <router-link to="/perfil-cliente" class="list-group-item list-group-item-action">Meu Perfil</router-link>
+          <router-link to="/pets" class="list-group-item list-group-item-action"> Médicos </router-link>
+          <router-link to="/consultas" class="list-group-item list-group-item-action">Minhas Consultas</router-link>
+          <router-link to="/pets" class="list-group-item list-group-item-action">Meus Pets</router-link>
+         
+        </div>
+        
+       
         <router-link to="/configuracoes" class="list-group-item list-group-item-action">Configurações</router-link>
-        <router-link to="/perfil-cliente" class="list-group-item list-group-item-action">Meu Perfil</router-link>
         <button @click="handleLogout" class="list-group-item list-group-item-action">Logout</button>
       </div>
     </div>
@@ -15,9 +25,40 @@
   
   <script>
   import { getAuth } from 'firebase/auth';
+  import { doc, getDoc, getFirestore } from 'firebase/firestore';
+
   
   export default {
     name: 'SidebarMenu',
+    data() {
+    return {
+      userType: null
+    };
+  },
+  created() {
+    const auth = getAuth();
+    const db = getFirestore(); // Inicializa Firestore
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        getDoc(userRef).then(docSnap => {
+          if (docSnap.exists()) {
+            this.userType = docSnap.data().userType; // Pega userType do Firestore
+            console.log("User type from Firestore:", this.userType);
+          } else {
+            console.log("No user data available in Firestore");
+          }
+        }).catch(error => {
+          console.error("Error fetching user data:", error);
+        });
+      } else {
+        // Se não há usuário, redireciona para login
+        this.$router.push('/login');
+      }
+ 
+    });
+  },
     methods: {
       handleLogout() {
         const auth = getAuth();
@@ -27,8 +68,11 @@
           console.error('Logout Failed', error);
         });
       }
+      
     }
   };
+
+  
   </script>
   
   <style scoped>

@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,watch } from 'vue';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/firebase';
 import { doc, getDoc, addDoc, collection, query, where, getDocs } from 'firebase/firestore';
@@ -146,7 +146,8 @@ export default {
     const errors = ref({});
     const showPetInfoCard = ref(false);  // Use this to toggle form visibility
     const selectedPet = ref(null);  // Define selectedPet to avoid undefined errors
-
+    const showSection = ref(''); // Adicionado conforme sugerido
+    const userProfile = ref(null); // Adicionado conforme sugerido
     
 
     onMounted(async () => {
@@ -168,11 +169,12 @@ export default {
 
 
 
-
-
-
-
-
+      // Watcher para monitorar a mudança da aba selecionada
+      watch(showSection, async (newSection) => {
+      if (newSection === 'pets') {      // Se a aba for "pets"
+        await fetchPets(userProfile.value.uid); // Carrega os pets do usuário
+      }
+    });
 
 
     const addPet = async () => {
@@ -205,7 +207,6 @@ export default {
     };
 
     
-    
   const validatePet = () => {
   errors.value = {};
 
@@ -228,7 +229,7 @@ export default {
 
 
   
-return { newPet, pets, addPet, errors, showPetInfoCard, selectedPet };
+return { newPet, pets, addPet, errors, showPetInfoCard, selectedPet,showSection,userProfile} ;
 }
 };
 
