@@ -1,10 +1,31 @@
 <template>
   <div class="pet-management">
+    <h1>Gestão de Pets</h1>
+    
+    <!-- Lista de Pets -->
+    <div v-for="pet in pets" :key="pet.id" class="pet-card">
+      <h3>{{ pet.name }}</h3>
+      <p><strong>Espécie:</strong> {{ pet.species }}</p>
+      <p><strong>Raça:</strong> {{ pet.breed }}</p>
+      <p><strong>Idade:</strong> {{ pet.age }} anos</p>
+      <p><strong>Sexo:</strong> {{ pet.sex }}</p>
+      <p><strong>Peso:</strong> {{ pet.weight }} kg</p>
+      <p><strong>Cor:</strong> {{ pet.color }}</p>
+      <p><strong>Microchip:</strong> {{ pet.microchip || "Não informado" }}</p>
+      <p><strong>Vacinas:</strong> {{ pet.vaccinations.length ? pet.vaccinations.join(', ') : "Nenhuma" }}</p>
+      <p><strong>Condições Médicas:</strong> {{ pet.conditions || "Nenhuma" }}</p>
+      <p><strong>Alergias:</strong> {{ pet.allergies || "Nenhuma" }}</p>
+      <p><strong>Contato de Emergência:</strong> {{ pet.emergencyContact || "Não informado" }}</p>
+      <button @click="editPet(pet)" class="btn-edit">Editar</button>
+    </div>
 
-    <h1 v-if="!showPetInfoCard">Adicionar Pet</h1>
-        <!-- Botão para abrir o formulário de adicionar pet -->
+    <!-- Botão para exibir o formulário de adicionar pet -->
+    <button class="btn-add-pet" @click="showPetForm()">Adicionar Pet</button>
 
-    <form v-if="!showPetInfoCard" @submit.prevent="addPet">
+    <!-- Formulário para adicionar ou editar pet -->
+    <form v-if="showPetInfoCard" @submit.prevent="isEditing ? updatePet() : addPet()" class="pet-form">
+      <h2>{{ isEditing ? "Editar Pet" : "Adicionar Novo Pet" }}</h2>
+      
       <div>
         <label for="petName">Nome do Pet:</label>
         <input id="petName" v-model="newPet.name" type="text" required>
@@ -42,7 +63,7 @@
       </div>
 
       <div>
-        <label for="weight">Peso:</label>
+        <label for="weight">Peso (kg):</label>
         <input id="weight" v-model.number="newPet.weight" type="number" min="0">
       </div>
 
@@ -52,77 +73,45 @@
       </div>
 
       <div>
-        <label for="microchip">Identificação (opcional):</label>
+        <label for="microchip">Microchip:</label>
         <input id="microchip" v-model="newPet.microchip" type="text">
       </div>
 
       <div>
         <label>Vacinação:</label>
-        <input type="checkbox" id="vaccine1" v-model="newPet.vaccinations">
+        <input type="checkbox" id="vaccine1" v-model="newPet.vaccinations" value="Vacina X">
         <label for="vaccine1">Vacina X</label>
       </div>
 
       <div>
-        <label for="conditions">Condições Médicas Preexistentes:</label>
-        <textarea id="conditions" v-model="newPet.conditions" maxlength="300"></textarea>
+        <label for="conditions">Condições Médicas:</label>
+        <textarea id="conditions" v-model="newPet.conditions"></textarea>
       </div>
 
       <div>
         <label for="allergies">Alergias:</label>
-        <textarea id="allergies" v-model="newPet.allergies" maxlength="300"></textarea>
-      </div>
-
-      <div>
-        <label for="photo">Foto do Pet:</label>
-        <input id="photo" type="file" @change="onFileChange">
-      </div>
-
-      <div>
-        <label for="ownerName">Nome do Dono ou Responsável:</label>
-        <input id="ownerName" v-model="newPet.ownerName" type="text" disabled value="Nome do Dono">
+        <textarea id="allergies" v-model="newPet.allergies"></textarea>
       </div>
 
       <div>
         <label for="emergencyContact">Contato de Emergência:</label>
-        <input id="emergencyContact" v-model="newPet.emergencyContact" type="text" required>
-        <span v-if="errors.emergencyContact" class="error">{{ errors.emergencyContact }}</span>
+        <input id="emergencyContact" v-model="newPet.emergencyContact" type="text">
       </div>
 
-      <button type="submit">Salvar Pet</button>
-      <button type="button" @click="showPetInfoCard = false">Cancelar</button>
-
+      <button type="submit" class="btn-submit">{{ isEditing ? "Atualizar Pet" : "Salvar Pet" }}</button>
+      <button type="button" @click="cancelEdit" class="btn-cancel">Cancelar</button>
     </form>
-
-    
-    <!-- Cards de Pets -->
-    <div v-for="pet in pets" :key="pet.id" class="pet-card">
-      <h3>{{ pet.name }}</h3>
-      <p>Espécie: {{ pet.species }}</p>
-      <p>Raça: {{ pet.breed }}</p>
-      <p>Idade: {{ pet.age }}</p>
-     
-    </div>
-
-    <!-- Card de Informações do Pet Selecionado -->
-    <div v-if="selectedPet" class="pet-info-card">
-      <h2>Informações do Pet</h2>
-      <p><strong>Nome:</strong> {{ selectedPet.name }}</p>
-      <p><strong>Espécie:</strong> {{ selectedPet.species }}</p>
-      <p><strong>Raça:</strong> {{ selectedPet.breed }}</p>
-      <p><strong>Idade:</strong> {{ selectedPet.age }}</p>
-      <button @click="closeCard">Fechar</button>
-    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted,watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/firebase';
-import { doc, getDoc, addDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, addDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 export default {
-  name: 'PetManagement',
+  name: 'PetOwnerProfile',
   setup() {
     const auth = getAuth();
     const pets = ref([]);
@@ -144,11 +133,15 @@ export default {
       ownerId: ''
     });
     const errors = ref({});
-    const showPetInfoCard = ref(false);  // Use this to toggle form visibility
-    const selectedPet = ref(null);  // Define selectedPet to avoid undefined errors
-    const showSection = ref(''); // Adicionado conforme sugerido
-    const userProfile = ref(null); // Adicionado conforme sugerido
-    
+    const showPetInfoCard = ref(false);
+    const isEditing = ref(false);
+    const editingPetId = ref(null);
+
+    const fetchPets = async (uid) => {
+      const petsQuery = query(collection(db, "pets"), where("ownerId", "==", uid));
+      const querySnapshot = await getDocs(petsQuery);
+      pets.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    };
 
     onMounted(async () => {
       const user = auth.currentUser;
@@ -158,24 +151,6 @@ export default {
         console.error("Usuário não autenticado ou indisponível");
       }
     });
-
-    const fetchPets = async (uid) => {
-      const petsQuery = query(collection(db, "pets"), where("ownerId", "==", uid));
-      const querySnapshot = await getDocs(petsQuery);
-      console.log("Número de pets encontrados:", querySnapshot.size);
-      pets.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log("Lista de pets atualizada:", pets.value);
-    };
-
-
-
-      // Watcher para monitorar a mudança da aba selecionada
-      watch(showSection, async (newSection) => {
-      if (newSection === 'pets') {      // Se a aba for "pets"
-        await fetchPets(userProfile.value.uid); // Carrega os pets do usuário
-      }
-    });
-
 
     const addPet = async () => {
       if (!validatePet()) {
@@ -197,142 +172,155 @@ export default {
       }
 
       try {
-        const docRef = await addDoc(collection(db, "pets"), {...newPet.value});
-        pets.value.push({ ...newPet.value, id: docRef.id });  // Add to local list
-        newPet.value = {};  // Reset newPet object
-        showPetInfoCard.value = false;  // Hide the form
+        const docRef = await addDoc(collection(db, "pets"), { ...newPet.value });
+        pets.value.push({ ...newPet.value, id: docRef.id });
+        resetForm();
       } catch (error) {
         console.error("Erro ao adicionar pet:", error);
       }
     };
 
-    
-  const validatePet = () => {
-  errors.value = {};
+    const editPet = (pet) => {
+      newPet.value = { ...pet };
+      editingPetId.value = pet.id;
+      isEditing.value = true;
+      showPetInfoCard.value = true;
+    };
 
-    if (!newPet.value.name.trim()) errors.value.name = "Nome do pet é obrigatório.";
-    if (!/^[a-zA-Z ]+$/.test(newPet.value.name)) errors.value.name = "Nome do pet deve conter apenas letras.";
+    const updatePet = async () => {
+      if (!validatePet()) {
+        alert("Verifique os campos e tente novamente.");
+        return;
+      }
 
-    if (!newPet.value.breed.trim()) errors.value.breed = "Raça é obrigatória.";
-    if (!/^[a-zA-Z ]+$/.test(newPet.value.breed)) errors.value.breed = "Raça deve conter apenas letras.";
+      const petRef = doc(db, "pets", editingPetId.value);
+      try {
+        await updateDoc(petRef, { ...newPet.value });
+        const index = pets.value.findIndex(pet => pet.id === editingPetId.value);
+        pets.value[index] = { ...newPet.value, id: editingPetId.value };
+        resetForm();
+      } catch (error) {
+        console.error("Erro ao atualizar pet:", error);
+      }
+    };
 
-    if (!newPet.value.age) errors.value.age = "Idade é obrigatória.";
-    if (isNaN(newPet.value.age) || newPet.value.age < 0) errors.value.age = "Idade deve ser um número válido.";
+    const showPetForm = () => {
+      resetForm();
+      showPetInfoCard.value = true;
+    };
 
-    if (newPet.value.emergencyContact && !/^(\(\d{2}\)\s)?(\d{4,5}-\d{4})$/.test(newPet.value.emergencyContact)) {
-      errors.value.emergencyContact = "Formato inválido para contato de emergência.";
+    const cancelEdit = () => {
+      resetForm();
+    };
+
+    const resetForm = () => {
+      newPet.value = {
+        name: '',
+        species: '',
+        breed: '',
+        age: '',
+        sex: '',
+        weight: '',
+        color: '',
+        microchip: '',
+        vaccinations: [],
+        conditions: '',
+        allergies: '',
+        photo: null,
+        ownerName: '',
+        emergencyContact: '',
+        ownerId: ''
+      };
+      isEditing.value = false;
+      editingPetId.value = null;
+      showPetInfoCard.value = false;
+    };
+
+    const validatePet = () => {
+      errors.value = {};
+
+      if (!newPet.value.name.trim()) errors.value.name = "Nome do pet é obrigatório.";
+      if (!/^[a-zA-Z ]+$/.test(newPet.value.name)) errors.value.name = "Nome do pet deve conter apenas letras.";
+
+      if (!newPet.value.breed.trim()) errors.value.breed = "Raça é obrigatória.";
+      if (!/^[a-zA-Z ]+$/.test(newPet.value.breed)) errors.value.breed = "Raça deve conter apenas letras.";
+
+      if (!newPet.value.age) errors.value.age = "Idade é obrigatória.";
+      if (isNaN(newPet.value.age) || newPet.value.age < 0) errors.value.age = "Idade deve ser um número válido.";
+
+      return Object.keys(errors.value).length === 0;
+    };
+
+    return {
+      newPet,
+      pets,
+      addPet,
+      updatePet,
+      editPet,
+      cancelEdit,
+      showPetForm,
+      errors,
+      showPetInfoCard,
+      isEditing
+    };
   }
-
-  return Object.keys(errors.value).length === 0;
 };
-
-
-
-  
-return { newPet, pets, addPet, errors, showPetInfoCard, selectedPet,showSection,userProfile} ;
-}
-};
-
-
-
 </script>
 
-  <style scoped>
+<style scoped>
 .pet-management {
-  max-width: 600px;
+  max-width: 800px;
   margin: 20px auto;
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #f5f5f5;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.pet-management h1 {
-  text-align: center;
-  color: #333;
-}
-
-.pet-management form {
-  display: grid;
-  grid-gap: 15px;
-  padding: 20px;
-}
-
-.pet-management label {
-  font-weight: bold;
-}
-
-.pet-management input[type="text"],
-.pet-management select,
-.pet-management textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.pet-management input[type="file"] {
-  border: none;
-  background-color: #e9ecef;
-}
-
-.pet-management button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.pet-management button:hover {
-  background-color: #0056b3;
-}
-
-.pet-management .error {
-  color: #dc3545;
-  font-size: 0.875em;
-}
-
-.pet-management .alert-success {
-  color: #155724;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-  padding: 10px;
-  margin-top: 15px;
-  border-radius: 4px;
-  text-align: center;
-}
-
-
-
-.pet-info-card {
-  padding: 20px;
-  margin-top: 20px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
 .pet-card {
   border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px;
+  padding: 15px;
+  margin: 15px 0;
   border-radius: 8px;
-  background-color: #f8f9fa;
+  background-color: #fff;
 }
 
-.pet-management button {
-  margin: 10px;
-  padding: 8px 16px;
+.pet-card h3 {
+  color: #007bff;
+}
+
+.pet-card p {
+  margin: 5px 0;
+}
+
+.btn-add-pet {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 20px 0;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 10px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
-.error {
-  color: red;
+
+.btn-cancel {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>

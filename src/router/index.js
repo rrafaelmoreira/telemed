@@ -4,8 +4,8 @@ import LoginPage from '../components/LoginPage.vue';
 import RegisterPage from '../components/RegisterPage.vue';
 import JitsiMeet from '../components/JitsiMeet.vue';
 import ForgotPasswordPage from '../components/ForgotPasswordPage.vue';
-
 import DoctorAgenda from '../components/DoctorAgenda.vue';
+import DoctorProfile from '../components/DoctorProfile.vue'        // Importando o novo componente DoctorProfile 
 import DoctorPatients from '../components/DoctorPatients.vue';
 import DoctorConsultations from '../components/DoctorConsultations.vue';
 import DoctorSettings from '../components/DoctorSettings.vue';
@@ -40,7 +40,8 @@ const routes = [
   { path: '/settings', name: 'Settings', component: DoctorSettings,meta: { requiresAuth: true }  },
   { path: '/criar-reuniao', name: 'Jitsi', component: DoctorMeet,meta: { requiresAuth: true }  }, 
   { path: '/perfil-cliente', name: 'OwnerProfile', component: PetOwnerProfile,meta: { requiresAuth: true }  },
-  
+  { path: '/perfil-medico', name: 'DrProfile', component: DoctorProfile,meta: { requiresAuth: true }  },
+
 ];
 
 // Criando a constante auth para verificar se o usuário está logado ou não  
