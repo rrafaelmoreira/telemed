@@ -5,7 +5,8 @@ import RegisterPage from '../components/RegisterPage.vue';
 import JitsiMeet from '../components/JitsiMeet.vue';
 import ForgotPasswordPage from '../components/ForgotPasswordPage.vue';
 import DoctorAgenda from '../components/DoctorAgenda.vue';
-import DoctorProfile from '../components/DoctorProfile.vue'        // Importando o novo componente DoctorProfile 
+import DoctorProfile from '../components/DoctorProfile.vue';        
+import DoctorList from '../components/DoctorList.vue';      
 import DoctorPatients from '../components/DoctorPatients.vue';
 import DoctorConsultations from '../components/DoctorConsultations.vue';
 import DoctorSettings from '../components/DoctorSettings.vue';
@@ -13,14 +14,6 @@ import DoctorMeet from '@/components/DoctorMeet.vue';
 import PetOwnerProfile from '@/components/PetOwnerProfile.vue';
 import Home from '../components/home.vue'; // Importando o novo componente Home
 import { getAuth } from 'firebase/auth';
-
-
-
-
-
-
-
-
 
 
 
@@ -41,6 +34,8 @@ const routes = [
   { path: '/criar-reuniao', name: 'Jitsi', component: DoctorMeet,meta: { requiresAuth: true }  }, 
   { path: '/perfil-cliente', name: 'OwnerProfile', component: PetOwnerProfile,meta: { requiresAuth: true }  },
   { path: '/perfil-medico', name: 'DrProfile', component: DoctorProfile,meta: { requiresAuth: true }  },
+  { path: '/lista-medico', name: 'DrList', component: DoctorList,meta: { requiresAuth: true }  },
+
 
 ];
 

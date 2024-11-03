@@ -16,7 +16,7 @@
          
         </div>
         
-       
+        <router-link to="/lista-medico" class="list-group-item list-group-item-action">Médicos</router-link>
         <router-link to="/configuracoes" class="list-group-item list-group-item-action">Configurações</router-link>
         <button @click="handleLogout" class="list-group-item list-group-item-action">Logout</button>
       </div>

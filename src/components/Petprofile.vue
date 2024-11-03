@@ -16,7 +16,7 @@
       <p><strong>Condições Médicas:</strong> {{ pet.conditions || "Nenhuma" }}</p>
       <p><strong>Alergias:</strong> {{ pet.allergies || "Nenhuma" }}</p>
       <p><strong>Contato de Emergência:</strong> {{ pet.emergencyContact || "Não informado" }}</p>
-      <button @click="editPet(pet)" class="btn-edit">Editar</button>
+      
     </div>
 
     <!-- Botão para exibir o formulário de adicionar pet -->

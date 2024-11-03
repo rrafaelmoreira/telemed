@@ -19,7 +19,7 @@
             <p><strong>Gênero:</strong> {{ userProfile.gender }}</p>
             <p><strong>CPF:</strong> {{ userProfile.cpf }}</p>
             <p><strong>CRM:</strong> {{ userProfile.crm }}</p>
-            <p><strong>Tipo de Usuário:</strong> {{ userProfile.userType }}</p>
+     
         <button class="btn btn-primary" @click="toggleEditMode">Editar</button>
       </div>
       <!-- Formulário de edição do perfil -->
@@ -71,7 +71,7 @@
 import { ref, onMounted, reactive,computed  } from 'vue';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/firebase';
-import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import PetProfile from './Petprofile.vue';  // Correção para o caminho correto, se necessário
 
 
@@ -95,7 +95,6 @@ export default {
 });
 
    
-    const pets = ref([]);               // Armazena os dados dos pets
     const editMode = ref(false);        // Controla o modo de edição do perfil
     const saveSuccess = ref(false);     // Indica se as alterações foram salvas com sucesso
     const showPetProfile = ref(false);
@@ -111,14 +110,7 @@ export default {
     }
 };
 
-   // Busca os dados dos pets
-   const fetchPets = async (uid) => {
-      const petsCollection = collection(db, `users/${uid}/pets`);
-      const petSnapshot = await getDocs(petsCollection);
-      pets.value = petSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    };
-
-
+   
 
 
     // Carrega os dados do usuário e dos pets ao montar o componente
@@ -126,7 +118,7 @@ export default {
     if (auth.currentUser) {
         userProfile.uid = auth.currentUser.uid;
         await fetchUserData(userProfile.uid);
-        await fetchPets(userProfile.uid);
+       
     } else {
         console.error("Usuário não autenticado ou indisponível");
     }
@@ -143,17 +135,38 @@ export default {
  
 
     // Alterna o modo de edição
+    
+
+
     const toggleEditMode = () => {
-      editMode.value = !editMode.value;
-    };
+      
+
+  // Verifica se todos os campos estão preenchidos corretamente
+  const requiredFieldsFilled = ['firstName', 'lastName', 'gender', 'cpf','crm'].every(field => {
+    const value = userProfile[field];
+    return value !== '' && value !== null && value !== undefined;
+  });
+
+  if (requiredFieldsFilled) {
+    editMode.value = !editMode.value;  // Alterna o modo de edição
+  } else {
+    console.error("Dados do perfil incompletos: ", userProfile);
+  }
+};
+
+
+
+
+
+
 
     // Valida os campos do formulário antes de salvar
     const validateForm = () => {
   const errors = {
-    firstName: !userProfile.value.firstName.match(/^[a-zA-ZáéíóúÁÉÍÓÚãõÃÕçÇ\s]+$/),
-    lastName: !userProfile.value.lastName.match(/^[a-zA-ZáéíóúÁÉÍÓÚãõÃÕçÇ\s]+$/) || userProfile.value.lastName.trim() === '',
-    socialName: userProfile.value.socialName && !userProfile.value.socialName.match(/^[a-zA-ZáéíóúÁÉÍÓÚãõÃÕçÇ\s]*$/),
-    cpf: !userProfile.value.cpf.match(/^\d{11}$/)
+    firstName: !userProfile.firstName.match(/^[a-zA-ZáéíóúÁÉÍÓÚãõÃÕçÇ\s]+$/),
+    lastName: !userProfile.lastName.match(/^[a-zA-ZáéíóúÁÉÍÓÚãõÃÕçÇ\s]+$/) || userProfile.lastName.trim() === '',
+    socialName: userProfile.socialName && !userProfile.socialName.match(/^[a-zA-ZáéíóúÁÉÍÓÚãõÃÕçÇ\s]*$/),
+    cpf: !userProfile.cpf.match(/^\d{11}$/)
   };
   // Atualiza os estados de erro no objeto de erros
   Object.keys(errors).forEach(key => {
@@ -169,14 +182,14 @@ export default {
         alert('Por favor, preencha todos os campos obrigatórios.');
         return;
       }
-      const userRef = doc(db, "users", userProfile.value.uid);
+      const userRef = doc(db, "users", userProfile.uid);
       try {
         await updateDoc(userRef, {
-          firstName: userProfile.value.firstName,
-          lastName: userProfile.value.lastName,
-          socialName: userProfile.value.socialName,
-          gender: userProfile.value.gender,
-          cpf: userProfile.value.cpf
+          firstName: userProfile.firstName,
+          lastName: userProfile.lastName,
+          socialName: userProfile.socialName,
+          gender: userProfile.gender,
+          cpf: userProfile.cpf
         });
         saveSuccess.value = true;  // Mostra a mensagem de sucesso
         setTimeout(() => {
@@ -191,7 +204,7 @@ export default {
     // Retorna dados e métodos para serem usados no template
     return {
       userProfile,
-      pets,
+      
       editMode,
       showSection,
       showPetProfile,
@@ -199,7 +212,6 @@ export default {
       updateUserProfile,
       toggleEditMode,
       fetchUserData,
-      fetchPets,
       validateForm,
       errorMessages: reactive({
         firstName: false,
