@@ -10,13 +10,10 @@
         </div>
         <div v-else-if="userType === 'cliente'" class="list-group">
           <router-link to="/perfil-cliente" class="list-group-item list-group-item-action">Meu Perfil</router-link>
-          <router-link to="/pets" class="list-group-item list-group-item-action"> Médicos </router-link>
-          <router-link to="/consultas" class="list-group-item list-group-item-action">Minhas Consultas</router-link>
-          <router-link to="/pets" class="list-group-item list-group-item-action">Meus Pets</router-link>
-         
+          <router-link to="/lista-medico" class="list-group-item list-group-item-action">Médicos disponiveis</router-link>
+
         </div>
         
-        <router-link to="/lista-medico" class="list-group-item list-group-item-action">Médicos</router-link>
         <router-link to="/configuracoes" class="list-group-item list-group-item-action">Configurações</router-link>
         <button @click="handleLogout" class="list-group-item list-group-item-action">Logout</button>
       </div>

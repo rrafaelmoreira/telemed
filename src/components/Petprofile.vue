@@ -17,6 +17,9 @@
       <p><strong>Alergias:</strong> {{ pet.allergies || "Nenhuma" }}</p>
       <p><strong>Contato de Emergência:</strong> {{ pet.emergencyContact || "Não informado" }}</p>
       
+      <!-- Botões de editar e remover -->
+      <button @click="editPet(pet)" class="btn-edit">Editar</button>
+      <button @click="removePet(pet.id)" class="btn-remove">Remover</button>
     </div>
 
     <!-- Botão para exibir o formulário de adicionar pet -->
@@ -108,7 +111,7 @@
 import { ref, onMounted } from 'vue';
 import { getAuth } from 'firebase/auth';
 import { db } from '@/firebase';
-import { doc, getDoc, updateDoc, addDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, addDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 export default {
   name: 'PetOwnerProfile',
@@ -204,6 +207,16 @@ export default {
       }
     };
 
+    const removePet = async (petId) => {
+      const petRef = doc(db, "pets", petId);
+      try {
+        await deleteDoc(petRef); // Remove o documento do Firestore
+        pets.value = pets.value.filter(pet => pet.id !== petId); // Remove o pet da lista local
+      } catch (error) {
+        console.error("Erro ao remover pet:", error);
+      }
+    };
+
     const showPetForm = () => {
       resetForm();
       showPetInfoCard.value = true;
@@ -257,6 +270,7 @@ export default {
       addPet,
       updatePet,
       editPet,
+      removePet,
       cancelEdit,
       showPetForm,
       errors,
@@ -293,34 +307,21 @@ export default {
   margin: 5px 0;
 }
 
-.btn-add-pet {
+.btn-add-pet, .btn-submit, .btn-cancel, .btn-edit, .btn-remove {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin: 20px 0;
+  margin: 5px 0;
 }
 
-.btn-submit {
-  width: 100%;
-  padding: 10px;
+.btn-add-pet, .btn-submit {
   background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
-.btn-cancel {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.btn-cancel, .btn-remove {
+  background-color: #dc3545;
 }
 </style>
