@@ -1,139 +1,135 @@
 <template>
-  <div class='demo-app'>
-    <!-- Contêiner principal da aplicação -->
-    <div class='demo-app-sidebar'>
-      <!-- Barra lateral com instruções e controles -->
-      <div class='demo-app-sidebar-section'>
-        <h2>Instructions</h2>
-        <ul>
-          <li>Select dates and you will be prompted to create a new event</li>
-          <!-- Selecionar datas no calendário permite criar novos eventos -->
-          <li>Drag, drop, and resize events</li>
-          <!-- Eventos podem ser arrastados e redimensionados -->
-          <li>Click an event to delete it</li>
-          <!-- Clicar em um evento oferece a opção de deletá-lo -->
-        </ul>
-      </div>
-      <div class='demo-app-sidebar-section'>
-        <label>
-          <input type='checkbox' :checked='calendarOptions.weekends' @change='handleWeekendsToggle' />
-          toggle weekends
-        </label>
-        <!-- Checkbox para habilitar ou desabilitar a visualização de finais de semana -->
-      </div>
-      <div class='demo-app-sidebar-section'>
-        <h2>All Events ({{ currentEvents.length }})</h2>
-        <!-- Mostra a contagem de eventos atuais -->
-        <ul>
-          <li v-for='event in currentEvents' :key='event.id'>
-            <!-- Lista todos eventos com seu início e título -->
-            <b>{{ event.startStr }}</b>
-            <i>{{ event.title }}</i>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div class='demo-app-main'>
-      <!-- Área principal onde o calendário é renderizado -->
-      <FullCalendar :options='calendarOptions' />
-    </div>
+  <div class="agenda-container">
+    <h1>Definir Disponibilidade</h1>
+    <FullCalendar :options="calendarOptions" />
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import FullCalendar from '@fullcalendar/vue3'  // Importa o componente FullCalendar
-import dayGridPlugin from '@fullcalendar/daygrid'  // Plugin para visualização em grade de dias
-import timeGridPlugin from '@fullcalendar/timegrid'  // Plugin para visualização em grade de tempo
-import interactionPlugin from '@fullcalendar/interaction'  // Plugin para interações como seleção e arraste
-import { INITIAL_EVENTS, createEventId } from './event-utils.js'  // Utilitários para eventos iniciais e criação de ID
+import { ref, onMounted } from 'vue';
+import FullCalendar from '@fullcalendar/vue3';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { db } from '@/firebase';
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
-export default defineComponent({
+export default {
   components: {
-    FullCalendar,  // Registra o FullCalendar como componente
+    FullCalendar,
   },
-  data() {
-    return {
-      calendarOptions: {
-        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],  // Plugins utilizados no calendário
-        headerToolbar: {
-          left: 'prev,next today',  // Botões no lado esquerdo do cabeçalho
-          center: 'title',  // Título no centro do cabeçalho
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'  // Botões para mudar a visualização no lado direito
-        },
-        initialView: 'dayGridMonth',  // Visualização inicial do calendário
-        initialEvents: INITIAL_EVENTS,  // Eventos iniciais definidos no arquivo de utilitários
-        editable: true,  // Permite editar eventos (arrastar, soltar, redimensionar)
-        selectable: true,  // Permite selecionar períodos no calendário
-        selectMirror: true,  // Mostra uma prévia da seleção enquanto seleciona
-        dayMaxEvents: true,  // Limita o número de eventos mostrados por dia com um link para expandir
-        weekends: true,  // Mostra finais de semana
-        select: this.handleDateSelect,  // Método chamado ao selecionar datas
-        eventClick: this.handleEventClick,  // Método chamado ao clicar em um evento
-        eventsSet: this.handleEvents  // Método chamado ao atualizar a lista de eventos
+  setup() {
+    const calendarOptions = ref({
+      plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+      initialView: 'timeGridWeek',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
       },
-      currentEvents: []  // Armazena os eventos atuais mostrados no calendário
-    };
-  },
-  methods: {
-    handleWeekendsToggle() {
-      this.calendarOptions.weekends = !this.calendarOptions.weekends  // Atualiza a propriedade de finais de semana
-    },
-    handleDateSelect(selectInfo) {
-      let title = prompt('Please enter a new title for your event');
-      let calendarApi = selectInfo.view.calendar;
+      selectable: true,
+      editable: true,
+      select: handleDateSelect,
+      eventClick: handleEventClick, // Adiciona a função de clique no evento
+      events: [], // Carregar eventos de disponibilidade do Firestore
+    });
+    
+    const currentEvents = ref([]);
+    const medicoId = ref(null);
 
-      calendarApi.unselect();  // Limpa a seleção atual
-
-      if (title) {
-        calendarApi.addEvent({
-          id: createEventId(),  // Cria um novo ID para o evento
-          title,
-          start: selectInfo.startStr,  // Define a data/hora de início baseado na seleção
-          end: selectInfo.endStr,  // Define a data/hora de término baseado na seleção
-          allDay: selectInfo.allDay  // Define se o evento ocupa o dia todo
-        });
-      }
-    },
-    handleEventClick(clickInfo) {
-      if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-        clickInfo.event.remove();  // Remove o evento se confirmado
-      }
-    },
-    handleEvents(events) {
-      this.currentEvents = events;  // Atualiza a lista de eventos atuais
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      medicoId.value = user.uid;
+    } else {
+      console.error("Usuário não autenticado");
     }
+
+    // Função para definir a disponibilidade
+    async function handleDateSelect(selectInfo) {
+      const start = selectInfo.startStr;
+      const end = selectInfo.endStr;
+
+      const confirmed = confirm(`Deseja definir este horário como disponível de ${start} até ${end}?`);
+      if (!confirmed) {
+        selectInfo.view.calendar.unselect();
+        return;
+      }
+
+      const newAvailability = {
+        title: 'Disponível',
+        start,
+        end,
+        color: '#88e1ff',
+        available: true, // Marca como horário disponível
+      };
+
+      if (medicoId.value) {
+        const eventsRef = collection(db, `users/${medicoId.value}/events`);
+        const eventDoc = await addDoc(eventsRef, newAvailability);
+        
+        // Adiciona o ID do documento para facilitar a exclusão posteriormente
+        newAvailability.id = eventDoc.id;
+        currentEvents.value.push(newAvailability);
+        calendarOptions.value.events = [...currentEvents.value];
+      }
+
+      selectInfo.view.calendar.unselect();
+    }
+
+    // Função para excluir um evento de disponibilidade
+    async function handleEventClick(clickInfo) {
+      const eventId = clickInfo.event.id;
+      const confirmed = confirm(`Tem certeza de que deseja excluir o horário de disponibilidade: '${clickInfo.event.title}'?`);
+
+      if (confirmed && medicoId.value) {
+        const eventRef = doc(db, `users/${medicoId.value}/events`, eventId);
+        
+        try {
+          await deleteDoc(eventRef); // Remove o evento do Firestore
+          clickInfo.event.remove(); // Remove o evento da interface do calendário
+          currentEvents.value = currentEvents.value.filter(event => event.id !== eventId);
+        } catch (error) {
+          console.error("Erro ao excluir o evento:", error);
+        }
+      }
+    }
+
+    // Função para buscar a disponibilidade do Firestore
+    async function fetchAvailability() {
+      if (medicoId.value) {
+        const eventsRef = collection(db, `users/${medicoId.value}/events`);
+        const querySnapshot = await getDocs(eventsRef);
+        querySnapshot.forEach((docSnapshot) => {
+          const eventData = docSnapshot.data();
+          eventData.id = docSnapshot.id; // Atribui o ID do documento para permitir exclusão
+          if (eventData.available) {
+            currentEvents.value.push(eventData);
+          }
+        });
+        calendarOptions.value.events = [...currentEvents.value];
+      }
+    }
+
+    onMounted(fetchAvailability);
+
+    return { calendarOptions };
   }
-});
+};
 </script>
-
-<style lang='css'>
-/* Estilos para o aplicativo, barra lateral, e área principal */
-.demo-app {
-  display: flex;
-  min-height: 100%;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 14px;
+<style scoped>
+.agenda-container {
+  max-width: 800px; /* Define uma largura máxima para a agenda */
+  margin: auto; /* Centraliza a agenda na tela */
+  padding: 20px;
+  background-color: #f9f9f9; /* Cor de fundo opcional para destacar a agenda */
+  border-radius: 8px; /* Bordas arredondadas para uma aparência mais elegante */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra leve para destacar a agenda */
 }
 
-.demo-app-sidebar {
-  width: 300px;
-  line-height: 1.5;
-  background: #eaf9ff;
-  border-right: 1px solid #d3e2e8;
-}
-
-.demo-app-sidebar-section {
-  padding: 2em;
-}
-
-.demo-app-main {
-  flex-grow: 1;
-  padding: 3em;
-}
-
-.fc { /* Estilos específicos para o calendário FullCalendar */
-  max-width: 1100px;
+.fc { /* Aplica o estilo ao FullCalendar */
+  max-width: 100%; /* Garante que o calendário respeite a largura do container */
   margin: 0 auto;
 }
 </style>

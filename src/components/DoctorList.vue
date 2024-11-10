@@ -13,13 +13,17 @@
 
 <script>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'; // Importando useRouter
+
 import { db } from '@/firebase';// Ajuste o caminho conforme seu arquivo de configuração
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where ,getDocs} from 'firebase/firestore';
 
 export default {
   name: 'ListaMedicos',
   setup() {
     const medicos = ref([]);
+    const router = useRouter(); // Acessando o roteador
+
 
     const fetchMedicos = async () => {
       const medicosRef = collection(db, 'users');
@@ -33,10 +37,15 @@ export default {
     };
 
     const agendar = (medico) => {
-      // Aqui você pode redirecionar para um componente de agendamento ou abrir um modal
+      if (confirm(`Deseja agendar uma consulta com ${medico.firstName} ${medico.lastName}?`)) {
+        router.push({ name: 'verAgenda', params: { medicoId: medico.id } }); // Usando router.push
+      }
       alert(`Agendamento para ${medico.firstName} ${medico.lastName}`);
-      // Implemente a lógica de agendamento aqui
     };
+
+
+
+
 
     onMounted(fetchMedicos);
 

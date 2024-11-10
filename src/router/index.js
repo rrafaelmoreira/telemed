@@ -12,6 +12,8 @@ import DoctorConsultations from '../components/DoctorConsultations.vue';
 import DoctorSettings from '../components/DoctorSettings.vue';
 import DoctorMeet from '@/components/DoctorMeet.vue';
 import PetOwnerProfile from '@/components/PetOwnerProfile.vue';
+import DoctorSchedule from '@/components/DoctorSchedule.vue';
+
 import Home from '../components/home.vue'; // Importando o novo componente Home
 import { getAuth } from 'firebase/auth';
 
@@ -35,8 +37,9 @@ const routes = [
   { path: '/perfil-cliente', name: 'OwnerProfile', component: PetOwnerProfile,meta: { requiresAuth: true }  },
   { path: '/perfil-medico', name: 'DrProfile', component: DoctorProfile,meta: { requiresAuth: true }  },
   { path: '/lista-medico', name: 'DrList', component: DoctorList,meta: { requiresAuth: true }  },
+  { path: '/medico-agenda/:medicoId', name: 'verAgenda', component: DoctorSchedule,meta: { requiresAuth: true } , props: true },
 
-
+  // Adicionando a rota para Home
 ];
 
 // Criando a constante auth para verificar se o usuário está logado ou não  
