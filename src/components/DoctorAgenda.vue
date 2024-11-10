@@ -99,15 +99,16 @@ export default {
     // Função para buscar a disponibilidade do Firestore
     async function fetchAvailability() {
       if (medicoId.value) {
+        currentEvents.value = []; // Limpa os eventos anteriores
+
         const eventsRef = collection(db, `users/${medicoId.value}/events`);
         const querySnapshot = await getDocs(eventsRef);
         querySnapshot.forEach((docSnapshot) => {
           const eventData = docSnapshot.data();
           eventData.id = docSnapshot.id; // Atribui o ID do documento para permitir exclusão
-          if (eventData.available) {
-            currentEvents.value.push(eventData);
-          }
+          currentEvents.value.push(eventData); // Adiciona todos os eventos, incluindo consultas
         });
+
         calendarOptions.value.events = [...currentEvents.value];
       }
     }

@@ -30,33 +30,37 @@ export default {
       },
       selectable: true,
       select: handleDateSelect,
-      events: [], // Carregar eventos e disponibilidade do Firestore
+      events: [], // Carregar eventos do Firestore
     });
 
     const disponibilidade = ref([]); // Guarda os horários disponíveis
-    const currentEvents = ref([]); // Guarda todos os eventos atuais, incluindo consultas
+    const consultas = ref([]); // Guarda as consultas já agendadas
+    const currentEvents = ref([]); // Guarda todos os eventos visíveis no calendário
 
-    // Função para buscar e sincronizar os eventos do Firestore
-    async function fetchAvailability() {
+    // Função para buscar os eventos do Firestore e atualizar o calendário
+    async function fetchEvents() {
       currentEvents.value = []; // Limpa o array de eventos para garantir que não há cache
+      disponibilidade.value = []; // Limpa as disponibilidades
+      consultas.value = []; // Limpa as consultas
 
       const eventsRef = collection(db, `users/${props.medicoId}/events`);
       const querySnapshot = await getDocs(eventsRef);
-      const events = [];
-      disponibilidade.value = []; // Limpa o array de disponibilidade para evitar duplicação
 
       querySnapshot.forEach((doc) => {
         const eventData = doc.data();
-        eventData.id = doc.id; // Adiciona o ID do documento para facilitar exclusão e manipulação
+        eventData.id = doc.id; // Atribui o ID do documento para permitir manipulação futura
 
+        // Diferencia entre eventos de disponibilidade e consultas já agendadas
         if (eventData.available) {
-          disponibilidade.value.push(eventData); // Adiciona apenas os horários disponíveis
+          disponibilidade.value.push(eventData); // Adiciona os horários disponíveis
+        } else {
+          consultas.value.push(eventData); // Adiciona as consultas agendadas
         }
-        events.push(eventData); // Adiciona todos os eventos, incluindo consultas agendadas
+
+        currentEvents.value.push(eventData); // Adiciona todos os eventos para exibição
       });
 
-      currentEvents.value = events; // Atualiza o array de eventos atuais
-      calendarOptions.value.events = [...currentEvents.value]; // Atualiza o calendário com os dados mais recentes
+      calendarOptions.value.events = [...currentEvents.value]; // Atualiza o calendário com todos os eventos
     }
 
     // Função para lidar com a seleção de data e horário para agendamento de consulta
@@ -64,12 +68,16 @@ export default {
       const start = selectInfo.startStr;
       const end = selectInfo.endStr;
 
-      // Verifica se o horário selecionado está dentro da disponibilidade
+      // Verifica se o horário selecionado está dentro da disponibilidade e não tem consulta
       const isAvailable = disponibilidade.value.some(event => 
         event.start <= start && event.end >= end
       );
 
-      if (!isAvailable) {
+      const isOccupied = consultas.value.some(event => 
+        event.start <= start && event.end >= end
+      );
+
+      if (!isAvailable || isOccupied) {
         alert('Este horário não está disponível para agendamento.');
         selectInfo.view.calendar.unselect();
         return;
@@ -89,15 +97,16 @@ export default {
         const eventsRef = collection(db, `users/${props.medicoId}/events`);
         const docRef = await addDoc(eventsRef, newEvent);
 
-        // Atualiza o ID do evento no array de eventos
+        // Atualiza o ID do evento no array de eventos e a lista de consultas
         newEvent.id = docRef.id;
-        currentEvents.value.push(newEvent); // Adiciona o evento aos eventos atuais
+        consultas.value.push(newEvent); // Adiciona o evento à lista de consultas
+        currentEvents.value.push(newEvent); // Adiciona o evento à lista de todos os eventos
         calendarOptions.value.events = [...currentEvents.value]; // Atualiza o calendário com o novo evento
       }
       selectInfo.view.calendar.unselect();
     }
 
-    onMounted(fetchAvailability); // Carrega e sincroniza os eventos quando o componente é montado
+    onMounted(fetchEvents); // Carrega e sincroniza os eventos quando o componente é montado
 
     return { calendarOptions };
   }
