@@ -30,7 +30,7 @@ const routes = [
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPasswordPage },
   { path: '/home', name: 'Home', component: Home,   meta: { requiresAuth: true }   } ,// Adicionando a rota para Home
   { path: '/agenda', name: 'Agenda', component: DoctorAgenda, meta: { requiresAuth: true } },
-  { path: '/patients', name: 'Patients', component: DoctorPatients },
+  { path: '/pacientes', name: 'Patients', component: DoctorPatients },
   { path: '/consultations', name: 'Consultations', component: DoctorConsultations,meta: { requiresAuth: true }  },
   { path: '/settings', name: 'Settings', component: DoctorSettings,meta: { requiresAuth: true }  },
   { path: '/criar-reuniao', name: 'Jitsi', component: DoctorMeet,meta: { requiresAuth: true }  }, 
