@@ -1,25 +1,28 @@
 <template>
   <div id="app">
-    <sidebar-menu v-if="isAuthenticated && $route.path !== '/login'"></sidebar-menu>
+    <!-- Exibe o HeaderComponent apenas quando o usuário está autenticado e não está na página de login -->
+    <HomeComponent v-if="isAuthenticated && $route.path !== '/login'" />
+
+    <!-- Área principal para o conteúdo da aplicação -->
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-import { onMounted, ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { auth } from './firebase';
-import SidebarMenu from './components/home.vue'; // Importe seu componente de menu
+import { onMounted, ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { auth } from "./firebase"; // Certifique-se de que está corretamente configurado
+import HomeComponent from "@/components/HomeComponent.vue"; // Caminho correto para o HeaderComponent
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    SidebarMenu
+    HomeComponent,
   },
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const isAuthenticated = ref(false); // Estado para controlar a autenticação
+    const isAuthenticated = ref(false); // Estado para verificar autenticação
 
     onMounted(() => {
       auth.onAuthStateChanged((user) => {
@@ -28,16 +31,16 @@ export default {
           console.log("Usuário autenticado:", user);
         } else {
           isAuthenticated.value = false; // Usuário não autenticado
-          if (route.path !== '/login') {
+          if (route.path !== "/login") {
             console.log("Nenhum usuário autenticado, redirecionando para login...");
-            router.push('/login');
+            router.push("/login"); // Redireciona para login
           }
         }
       });
     });
 
     return { isAuthenticated };
-  }
+  },
 };
 </script>
 
