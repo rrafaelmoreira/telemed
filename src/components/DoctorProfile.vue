@@ -1,25 +1,27 @@
 <template>
+  <div class="doctorProfile-page d-flex justify-content-center align-items-center">
   <div class="profile-container">
-    <h1 class="text-center">Meu Perfil</h1>
 
     <div v-if="showSection === 'profile'">
-      <h2 class="text-center">Perfil do Médico</h2>
       <div v-if="!editMode" class="profile-view">
-        <p><strong>Nome:</strong> {{ userProfile.firstName }}</p>
-        <p><strong>Sobrenome:</strong> {{ userProfile.lastName }}</p>
-        <p><strong>Nome Social:</strong> {{ userProfile.socialName || 'Não informado' }}</p>
-        <p><strong>Gênero:</strong> {{ userProfile.gender }}</p>
-        <p><strong>CPF:</strong> {{ userProfile.cpf }}</p>
-        <p><strong>CRM:</strong> {{ userProfile.crm }}</p>
-        <p><strong>Especialidade:</strong> {{ userProfile.specialty }}</p>
-        <p><strong>Qualificações:</strong> {{ userProfile.qualifications }}</p>
-        <p><strong>Anos de Experiência:</strong> {{ userProfile.experienceYears }}</p>
-        <p><strong>Idiomas:</strong> {{ userProfile.languages }}</p>
-        <p><strong>Contato:</strong> {{ userProfile.contact }}</p>
-        <p><strong>Horários de Atendimento:</strong> {{ userProfile.workingHours }}</p>
-        <p><strong>Biografia:</strong> {{ userProfile.bio }}</p>
-        <p><strong>Endereço do Consultório:</strong> {{ userProfile.officeAddress }}</p>
-        <button class="btn btn-primary" @click="toggleEditMode">Editar</button>
+        <div row d-flex align-items-center>
+          <div class="col text-start"><strong>Nome Completo:</strong> {{ userProfile.firstName }} {{ userProfile.lastName }}</div>
+          <div v-if="userProfile.socialName" class="row d-inline ms-3"><strong>Nome Social:</strong> {{ userProfile.socialName || 'Não informado' }}</div>
+        </div>
+        <div class="row d-flex align-items-center justify-content-start gap-3">
+          <div class="col-auto"><strong>Gênero:</strong> {{ userProfile.gender }}</div>   
+          <div class="col-auto"><strong>CPF:</strong> {{ userProfile.cpf }}</div>
+          <div class="col-auto"><strong>CRMV:</strong> {{ userProfile.crm }}</div>
+        </div>
+        <div>
+          <div class="col text-start"><strong>Especialidade:</strong> {{ userProfile.specialty }}</div>
+        </div>
+        <div class="row d-flex align-items-center justify-content-start gap-2">
+          <div class="col-auto"><strong>Contato:</strong> {{ userProfile.contact }}</div>
+          <div class="col-auto"><strong>Horários de Atendimento:</strong> {{ userProfile.workingHours }}</div>
+        </div>
+        <div class="col text-start"><strong>Endereço:</strong> {{ userProfile.officeAddress }}</div>
+        <button class="btn edit-button" @click="toggleEditMode">Editar</button>
       </div>
 
       <!-- Formulário de edição do perfil -->
@@ -30,28 +32,12 @@
           <input id="specialty" v-model="userProfile.specialty" type="text" @input="validateForm" placeholder="Especialidade">
         </div>
         <div>
-          <label for="qualifications">Qualificações:</label>
-          <textarea id="qualifications" v-model="userProfile.qualifications" @input="validateForm" placeholder="Descreva suas qualificações"></textarea>
-        </div>
-        <div>
-          <label for="experienceYears">Anos de Experiência:</label>
-          <input id="experienceYears" v-model="userProfile.experienceYears" type="number" min="0" @input="validateForm" placeholder="Anos de experiência">
-        </div>
-        <div>
-          <label for="languages">Idiomas:</label>
-          <input id="languages" v-model="userProfile.languages" type="text" @input="validateForm" placeholder="Idiomas falados">
-        </div>
-        <div>
           <label for="contact">Contato:</label>
           <input id="contact" v-model="userProfile.contact" type="text" @input="validateForm" placeholder="Telefone ou email">
         </div>
         <div>
           <label for="workingHours">Horários de Atendimento:</label>
           <input id="workingHours" v-model="userProfile.workingHours" type="text" @input="validateForm" placeholder="Horários disponíveis">
-        </div>
-        <div>
-          <label for="bio">Biografia:</label>
-          <textarea id="bio" v-model="userProfile.bio" @input="validateForm" placeholder="Uma breve biografia"></textarea>
         </div>
         <div>
           <label for="officeAddress">Endereço do Consultório:</label>
@@ -62,6 +48,7 @@
         <div v-if="saveSuccess" class="alert alert-success">Alterações salvas com sucesso!</div>
       </form>
     </div>
+  </div>
   </div>
 </template>
 
@@ -84,12 +71,8 @@ export default {
       cpf: '',
       crm: '',
       specialty: '',
-      qualifications: '',
-      experienceYears: 0,
-      languages: '',
       contact: '',
       workingHours: '',
-      bio: '',
       officeAddress: ''
     });
 
@@ -170,6 +153,12 @@ export default {
 
 
 <style scoped>
+
+.doctorProfile-page {
+  background: url('~@/assets/background.jpg') repeat center fixed;
+  height: 100vh;
+}
+
 .profile-container {
   max-width: 800px; /* Ajustado para acomodar mais campos */
   margin: 2rem auto;
@@ -215,10 +204,14 @@ export default {
   cursor: pointer;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
+.edit-button {
+  border-radius: 30px;
+  padding: 10px;
+  font-weight: bold;
+  background-color: #75cfcf;
   color: white;
+  border-color: #75cfcf;
+  text-decoration: none;
 }
 
 .btn-success {
