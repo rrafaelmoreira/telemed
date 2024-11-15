@@ -4,7 +4,7 @@
       <div class="icon-container">
         <img src="../assets/logo.png" alt="Logo Icon" />
       </div>
-      <h2 class="modal-title w-100 text-center login-header" id="LoginModal">Login</h2>
+      <h2 class="modal-title w-100 text-center login-header">Login</h2>
 
       <form @submit.prevent="handleLogin">
         <div class="mb-3">
