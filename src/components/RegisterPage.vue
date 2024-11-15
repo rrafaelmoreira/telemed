@@ -76,11 +76,9 @@
   </div>
 </template>
 <script>
-import { auth } from '@/firebase';
+import { auth, db } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { db } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
-
 
 
 export default {
