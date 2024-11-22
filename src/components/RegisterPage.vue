@@ -1,38 +1,42 @@
 <template>
-  <div class="register-page d-flex justify-content-center align-items-center">
-    <div class="register-container">
+  <div class="logcad-page d-flex justify-content-center align-items-center">
+    <div class="logcad-container">
       <div class="icon-container">
         <img src="../assets/logo.png" alt="Logo Icon" />
       </div>
-      <h2 class="modal-title w-100 text-center register-header">Cadastro</h2>
+      <h2 class="modal-title w-100 text-center logcad-header">Cadastro</h2>
 
       <form @submit.prevent="handleRegister">
         <!-- Seleção do tipo de usuário -->
-        <div class="mb-3">
-          <select v-model="userType" class="form-select register-input">
-            <option value="cliente">Cliente</option>
-            <option value="medico">Médico</option>
-          </select>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <select v-model="userType" class="form-select logcad-input">
+              <option value="cliente">Tutor</option>
+              <option value="medico">Veterinario</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <input type="email" class="form-control logcad-input" placeholder="name@email.com" v-model="email"
+              required />
+          </div>
         </div>
 
         <!-- Email e Nome Completo -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <input type="email" class="form-control register-input" placeholder="name@email.com" v-model="email" required />
+            <input type="text" class="form-control logcad-input" placeholder="Nome completo*" v-model="fullName"
+              required />
           </div>
           <div class="col-md-6">
-            <input type="text" class="form-control register-input" placeholder="Nome completo" v-model="fullName"
-              required />
+            <input type="text" class="form-control logcad-input" placeholder="Nome Social" v-model="socialName" />
           </div>
         </div>
 
         <!-- Nome Social e Gênero -->
         <div class="row mb-3">
+
           <div class="col-md-6">
-            <input type="text" class="form-control register-input" placeholder="Nome Social" v-model="socialName" />
-          </div>
-          <div class="col-md-6">
-            <select v-model="gender" class="form-select register-input">
+            <select v-model="gender" class="form-select logcad-input">
               <option value="masculino">Masculino</option>
               <option value="feminino">Feminino</option>
               <option value="outro">Outro</option>
@@ -43,30 +47,29 @@
         <!-- CPF e CRMV (caso Médico) -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <input type="text" class="form-control register-input" placeholder="123.456.789-10" v-model.lazy="user.cpf"
-              @input="formatCPF" required maxlength="14"/>
+            <input type="text" class="form-control logcad-input" placeholder="123.456.789-10" v-model.lazy="user.cpf"
+              @input="formatCPF" required maxlength="14" />
           </div>
           <div v-if="user.cpf && !validateCPF(user.cpf)" class="invalid-feedback">
             CPF inválido.
           </div>
           <div class="col-md-6" v-if="userType === 'medico'">
-            <input type="text" class="form-control register-input" placeholder="CRMV" v-model="crmv" required />
+            <input type="text" class="form-control logcad-input" placeholder="CRMV" v-model="crmv" required />
           </div>
         </div>
 
         <!-- Senha e Confirmação de Senha -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <input type="password" class="form-control register-input" placeholder="Senha" v-model="password"
-              required />
+            <input type="password" class="form-control logcad-input" placeholder="Senha" v-model="password" required />
           </div>
           <div class="col-md-6">
-            <input type="password" class="form-control register-input" placeholder="Confirmar Senha"
+            <input type="password" class="form-control logcad-input" placeholder="Confirmar Senha"
               v-model="confirmPassword" required />
           </div>
         </div>
 
-        <button type="submit" class="btn btn-success w-100 register-button">Cadastrar</button>
+        <button type="submit" class="btn btn-success w-100 logcad-button">Cadastrar</button>
 
         <hr>
         <p class="text-center">Já tem conta? <router-link class="create-account" to="/login">Entrar</router-link></p>
@@ -174,59 +177,3 @@ export default {
   }
 };
 </script>
-
-
-<style scoped>
-.register-page {
-  background: url('~@/assets/background.jpg') repeat center fixed;
-  height: 100vh;
-}
-
-.register-container {
-  background-color: white;
-  border-radius: 10px;
-  padding: 30px;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.register-header {
-  margin-bottom: 20px;
-}
-
-.register-input {
-  border-radius: 30px;
-  padding: 10px 15px;
-}
-
-.register-button {
-  border-radius: 30px;
-  padding: 10px;
-  font-weight: bold;
-  background-color: #75cfcf;
-  color: white;
-  border-color: #75cfcf;
-}
-
-.register-button:hover {
-  background-color: #5bb6b6;
-  border-color: #5bb6b6;
-}
-.create-account{
-  text-align: center;
-  margin-top: 10px;
-  text-decoration: none;
-}
-
-.icon-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.icon-container img {
-  width: 100px;
-  height: auto;
-}
-</style>

@@ -4,6 +4,7 @@ import router from './router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 import { VueMaskDirective } from 'v-mask';
+import './styles/style.css';
 
 // Primeiro, crie a aplicação Vue
 const app = createApp(App);

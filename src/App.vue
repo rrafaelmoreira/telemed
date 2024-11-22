@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <!-- Exibe o HeaderComponent apenas quando o usuário está autenticado e não está na página de login -->
-    <HomeComponent v-if="isAuthenticated && $route.path !== '/login'" />
 
     <!-- Área principal para o conteúdo da aplicação -->
     <router-view></router-view>
@@ -12,12 +11,11 @@
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { auth } from "./firebase"; // Certifique-se de que está corretamente configurado
-import HomeComponent from "@/components/HomeComponent.vue"; // Caminho correto para o HeaderComponent
 
 export default {
   name: "App",
   components: {
-    HomeComponent,
+    
   },
   setup() {
     const router = useRouter();

@@ -2,34 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import LoginPage from '../components/LoginPage.vue';
 import RegisterPage from '../components/RegisterPage.vue';
-import JitsiMeet from '../components/JitsiMeet.vue';
-import ForgotPasswordPage from '../components/ForgotPasswordPage.vue';
-import DoctorAgenda from '../components/DoctorAgenda.vue';
-import DoctorProfile from '../components/DoctorProfile.vue';
-import DoctorList from '../components/DoctorList.vue';
-import DoctorPatients from '../components/DoctorPatients.vue';
-import DoctorConsultations from '../components/DoctorConsultations.vue';
-import DoctorSettings from '../components/DoctorSettings.vue';
-import DoctorMeet from '@/components/DoctorMeet.vue';
-import PetOwnerProfile from '@/components/PetOwnerProfile.vue';
-import DoctorSchedule from '@/components/DoctorSchedule.vue';
 import { getAuth } from 'firebase/auth';
+import DoctorPatients from '@/components/DoctorPatients.vue';
 
 const routes = [
-  { path: '/', redirect: '/home' },  // Alterando para redirecionar para /home
-  { path: '/login', name: 'Login', component: LoginPage },
-  { path: '/register', name: 'Register', component: RegisterPage },
-  { path: '/jitsi', name: 'Jitsi', component: JitsiMeet },
-  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPasswordPage },
-  { path: '/agenda', name: 'Agenda', component: DoctorAgenda, meta: { requiresAuth: true } },
-  { path: '/pacientes', name: 'Patients', component: DoctorPatients },
-  { path: '/consultations', name: 'Consultations', component: DoctorConsultations, meta: { requiresAuth: true } },
-  { path: '/settings', name: 'Settings', component: DoctorSettings, meta: { requiresAuth: true } },
-  { path: '/criar-reuniao', name: 'Jitsi', component: DoctorMeet, meta: { requiresAuth: true } },
-  { path: '/perfil-cliente', name: 'OwnerProfile', component: PetOwnerProfile, meta: { requiresAuth: true } },
-  { path: '/perfil-medico', name: 'DrProfile', component: DoctorProfile, meta: { requiresAuth: true } },
-  { path: '/lista-medico', name: 'DrList', component: DoctorList, meta: { requiresAuth: true } },
-  { path: '/medico-agenda/:medicoId', name: 'verAgenda', component: DoctorSchedule, meta: { requiresAuth: true }, props: true },
+  { path: '/', redirect: '/login' },
+  { path: '/dashboard', name: 'Dashboard', component: DoctorPatients },
+  { path: '/login', name: 'Login', component: LoginPage, meta: { hideHeader: true } },
+  { path: '/register', name: 'Register', component: RegisterPage, meta: { hideHeader: true } },
 
   // Adicionando a rota para Home
 ];
@@ -51,7 +31,10 @@ router.beforeEach((to, from, next) => {
   } else if (to.matched.some((record) => record.meta.requiresGuest) && user) {
     // Se a rota requer que o usuário seja um convidado (não logado) e o usuário está logado
     next("/dashboard"); // Redireciona para a página principal ou painel
-  } else {
+  } else if (to.matched.some((record) => record.meta.hideHeader) && user) {
+    next("/home");
+  }
+  else {
     // Caso contrário, permite a navegação
     next();
   }
