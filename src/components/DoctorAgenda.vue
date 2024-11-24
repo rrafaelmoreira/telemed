@@ -1,20 +1,69 @@
 <template>
   <div class="agenda-container">
     <h1>Definir Disponibilidade</h1>
+    <!-- Calendário -->
     <FullCalendar :options="calendarOptions" />
+
+    <!-- Modal para criar evento -->
+    <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEventModalLabel">Adicionar disponibilidade</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Formulário para criar evento -->
+            <form @submit.prevent="addEvent">
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <p for="eventDate" class="form-label">Data:</p>
+                </div>
+                <div class="col-md-10">
+                  <input type="date" v-model="newEvent.date" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <p for="startTime" class="form-label">Início:</p>
+                </div>
+                <div class="col-md-10">
+                  <input type="time" v-model="newEvent.startTime" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <p for="endTime" class="form-label">Término:</p>
+                </div>
+                <div class="col-md-10">
+                  <input type="time" v-model="newEvent.endTime" class="form-control" required />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-gradient w-100 logcad-button">Salvar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    
+    <!-- Botão para abrir o modal -->
+    <button type="button" class="btn btn-gradient w-100 logcad-button" data-bs-toggle="modal" data-bs-target="#addEventModal">
+      Adicionar Disponibilidade
+    </button>
   </div>
+
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import FullCalendar from '@fullcalendar/vue3';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import allLocales from '@fullcalendar/core/locales-all';
-import { db } from '@/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { ref } from "vue";
+import FullCalendar from "@fullcalendar/vue3";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import allLocales from "@fullcalendar/core/locales-all";
 
 export default {
   components: {
@@ -22,175 +71,97 @@ export default {
   },
   setup() {
     const calendarOptions = ref({
-      themeSystem: 'bootstrap5', // Estilização com Bootstrap 5
+      themeSystem: "bootstrap5",
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-      initialView: 'timeGridWeek', // Visualização inicial (semana)
-      locales: allLocales, // Suporte para múltiplos idiomas
-      locale: 'pt-br', // Define o calendário para Português
+      initialView: "timeGridWeek",
+      locales: allLocales,
+      locale: "pt-br",
       headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'timeGridWeek,timeGridDay',
+        left: "prev next today",
+        center: "title",
+        right: "timeGridWeek,timeGridDay",
       },
-      selectable: true, // Permite selecionar horários
-      editable: true, // Permite arrastar e editar eventos
-      eventClick: handleEventClick, // Clique nos eventos
-      select: handleDateSelect, // Seleção de horários
-      events: [], // Inicialmente vazio, será carregado do Firestore
-      slotDuration: '01:00:00', // Intervalo entre os horários
-      slotLabelInterval: '01:00:00', // Exibição das marcações de horários
-      minTime: '08:00:00', // Horário mínimo de exibição (8h)
-      maxTime: '18:00:00', // Horário máximo de exibição (18h)
-      expandRows: true, // Garante que todas as linhas tenham a mesma altura
+      titleFormat: { year: "numeric", month: "2-digit", day: "2-digit" },
+      events: [], // Eventos adicionados aparecerão aqui
+      allDaySlot: false, // Remove o campo "dia inteiro"
+      slotDuration: "01:00:00", // Intervalos de 1 hora
+      slotLabelInterval: "01:00:00", // Exibir rótulos a cada 1 hora
+      start: "08:00:00", // Horário inicial do calendário
+      end: "18:00:00", // Horário final do calendário
     });
 
-    const currentEvents = ref([]); // Eventos carregados no calendário
-    const medicoId = ref(getAuth().currentUser ? getAuth().currentUser.uid : null);
+    const newEvent = ref({
+      date: "",
+      startTime: "",
+      endTime: "",
+    });
 
-    if (!medicoId.value) {
-      console.error("Usuário não autenticado");
-      return;
-    }
+    const currentEvents = ref([]);
 
-    // Função para definir a disponibilidade do médico
-    async function handleDateSelect(selectInfo) {
-      const start = selectInfo.startStr;
-      const end = selectInfo.endStr;
+    // Função para adicionar evento ao calendário
+    const addEvent = () => {
+      const { date, startTime, endTime } = newEvent.value;
 
-      const formattedStart = new Date(start).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const formattedEnd = new Date(end).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const confirmed = confirm(
-        `Deseja definir o horário de ${formattedStart} até ${formattedEnd} como disponível?`
-      );
-
-      if (!confirmed) {
-        selectInfo.view.calendar.unselect();
+      // Verifica se os dados estão completos
+      if (!date || !startTime || !endTime) {
+        alert("Por favor, preencha todos os campos.");
         return;
       }
 
-      const newAvailability = {
-        title: 'Disponível',
+      const start = `${date}T${startTime}:00`;
+      const end = `${date}T${endTime}:00`;
+
+      // Cria um novo evento
+      const event = {
+        title: "Disponível",
         start,
         end,
-        color: '#88e1ff',
-        available: true,
+        color: "#88e1ff",
       };
 
-      const eventsRef = collection(db, `users/${medicoId.value}/events`);
-      const eventDoc = await addDoc(eventsRef, newAvailability);
+      // Adiciona o evento ao calendário
+      calendarOptions.value.events.push(event);
+      currentEvents.value.push(event);
 
-      newAvailability.id = eventDoc.id;
-      currentEvents.value.push(newAvailability);
-      calendarOptions.value.events = [...currentEvents.value];
+      // Limpa os campos do formulário
+      newEvent.value = {
+        date: "",
+        startTime: "",
+        endTime: "",
+      };
 
-      selectInfo.view.calendar.unselect();
-    }
+    };
 
-    // Função para exibir informações detalhadas do evento e deletar
-    async function handleEventClick(clickInfo) {
-      const eventId = clickInfo.event.id;
-      const event = currentEvents.value.find((e) => e.id === eventId);
-
-      if (!event) {
-        alert('Evento não encontrado.');
-        return;
-      }
-
-      const deleteConfirmed = confirm(`Deseja excluir o evento ${event.title}?`);
-      if (deleteConfirmed) {
-        await deleteEvent(eventId, clickInfo);
-      }
-    }
-
-    // Função para excluir eventos
-    async function deleteEvent(eventId, clickInfo) {
-      const eventRef = doc(db, `users/${medicoId.value}/events`, eventId);
-      try {
-        await deleteDoc(eventRef);
-        clickInfo.event.remove();
-        currentEvents.value = currentEvents.value.filter((event) => event.id !== eventId);
-      } catch (error) {
-        console.error('Erro ao excluir o evento:', error);
-      }
-    }
-
-    // Função para carregar eventos do Firestore
-    async function fetchAvailability() {
-      currentEvents.value = [];
-
-      const eventsRef = collection(db, `users/${medicoId.value}/events`);
-      const querySnapshot = await getDocs(eventsRef);
-
-      for (const docSnapshot of querySnapshot.docs) {
-        const eventData = docSnapshot.data();
-        eventData.id = docSnapshot.id;
-
-        currentEvents.value.push(eventData);
-      }
-
-      calendarOptions.value.events = [...currentEvents.value];
-    }
-
-    onMounted(fetchAvailability);
-
-    return { calendarOptions };
+    return {
+      calendarOptions,
+      newEvent,
+      addEvent,
+    };
   },
 };
 </script>
 
 <style scoped>
-/* Container principal do calendário */
 .agenda-container {
-  max-width: 900px;
-  margin: auto;
+  max-width: 90%;
+  margin: 0 auto;
   padding: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilização dos eventos no calendário */
 .fc .fc-event {
   background-color: #88e1ff !important;
-  border: none !important;
-  color: #ffffff !important;
-  font-size: 0.9em;
-  border-radius: 4px;
-}
-
-/* Título dos eventos */
-.fc .fc-event-title {
-  font-weight: bold;
-}
-
-/* Customizações gerais do FullCalendar */
-.fc-toolbar-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-.fc .fc-button {
-  background-color: #4a7c59;
   color: white !important;
   border-radius: 4px;
 }
-
-.fc .fc-button:hover {
-  background-color: #36743a;
-  color: white !important;
+.modal-body form .form-label {
+  display: flex;
+  align-items: center; /* Alinha o texto verticalmente no meio */
+  margin-bottom: 0; /* Remove margens 1extras */
+  height: 100%; /* Certifica-se de ocupar toda a altura */
 }
+
+.modal-body form .form-control {
+  margin-top: 5px; /* Ajusta o espaçamento entre o label e o campo */
+}
+
 </style>

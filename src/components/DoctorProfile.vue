@@ -87,41 +87,7 @@
           <div class="col-md-6">
             <div class="card shadow-sm border-0 mx-auto h-100">
               <div class="card-body">
-                <h5 class="fw-bold text-start">Horários Disponíveis</h5>
-                <div class="row align-items-center">
-                  <!-- Formulário para adicionar horários -->
-                  <div class="col-12 mb-3">
-                    <input
-                      type="datetime-local"
-                      v-model="newSchedule"
-                      class="form-control mb-2"
-                    />
-                    <button
-                      class="btn btn-success btn-sm"
-                      @click="addSchedule"
-                    >
-                      Adicionar Horário
-                    </button>
-                  </div>
-                  <!-- Lista de horários -->
-                  <div class="col-12">
-                    <ul class="list-group">
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center"
-                        v-for="(schedule, index) in schedules"
-                        :key="index"
-                      >
-                        {{ schedule }}
-                        <button
-                          class="btn btn-danger btn-sm"
-                          @click="removeSchedule(index)"
-                        >
-                          Remover
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                <DoctorAgenda />
               </div>
             </div>
           </div>
@@ -133,10 +99,12 @@
 
 <script>
 import HeaderComponent from "@/components/HeaderComponent.vue";
+import DoctorAgenda from "./DoctorAgenda.vue";
 
 export default {
   components: {
     HeaderComponent,
+    DoctorAgenda,
   },
   data() {
     return {
