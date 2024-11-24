@@ -13,7 +13,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import allLocales from '@fullcalendar/core/locales-all';
 import { db } from '@/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 export default {
@@ -22,29 +22,29 @@ export default {
   },
   setup() {
     const calendarOptions = ref({
-      themeSystem: 'bootstrap5',
+      themeSystem: 'bootstrap5', // Estilização com Bootstrap 5
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-      initialView: 'timeGridWeek',
-      locales: allLocales,
-      locale: 'pt-br',
+      initialView: 'timeGridWeek', // Visualização inicial (semana)
+      locales: allLocales, // Suporte para múltiplos idiomas
+      locale: 'pt-br', // Define o calendário para Português
       headerToolbar: {
-        left: 'prev next today',
+        left: 'prev,next today',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        right: 'timeGridWeek,timeGridDay',
       },
-      titleFormat: { year: 'numeric', month: '2-digit', day: '2-digit' },
-      selectable: true,
-      editable: true,
-      eventClick: handleEventClick,
-      select: handleDateSelect,
-      events: [],
-      slotDuration: '00:30:00',
-      slotLabelInterval: '01:00:00',
-      expandRows: false,
-
+      selectable: true, // Permite selecionar horários
+      editable: true, // Permite arrastar e editar eventos
+      eventClick: handleEventClick, // Clique nos eventos
+      select: handleDateSelect, // Seleção de horários
+      events: [], // Inicialmente vazio, será carregado do Firestore
+      slotDuration: '01:00:00', // Intervalo entre os horários
+      slotLabelInterval: '01:00:00', // Exibição das marcações de horários
+      minTime: '08:00:00', // Horário mínimo de exibição (8h)
+      maxTime: '18:00:00', // Horário máximo de exibição (18h)
+      expandRows: true, // Garante que todas as linhas tenham a mesma altura
     });
-    
-    const currentEvents = ref([]);
+
+    const currentEvents = ref([]); // Eventos carregados no calendário
     const medicoId = ref(getAuth().currentUser ? getAuth().currentUser.uid : null);
 
     if (!medicoId.value) {
@@ -52,12 +52,31 @@ export default {
       return;
     }
 
-    // Função para definir a disponibilidade
+    // Função para definir a disponibilidade do médico
     async function handleDateSelect(selectInfo) {
       const start = selectInfo.startStr;
       const end = selectInfo.endStr;
 
-      const confirmed = confirm(`Deseja definir este horário como disponível de ${start} até ${end}?`);
+      const formattedStart = new Date(start).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const formattedEnd = new Date(end).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const confirmed = confirm(
+        `Deseja definir o horário de ${formattedStart} até ${formattedEnd} como disponível?`
+      );
+
       if (!confirmed) {
         selectInfo.view.calendar.unselect();
         return;
@@ -73,7 +92,7 @@ export default {
 
       const eventsRef = collection(db, `users/${medicoId.value}/events`);
       const eventDoc = await addDoc(eventsRef, newAvailability);
-      
+
       newAvailability.id = eventDoc.id;
       currentEvents.value.push(newAvailability);
       calendarOptions.value.events = [...currentEvents.value];
@@ -81,115 +100,49 @@ export default {
       selectInfo.view.calendar.unselect();
     }
 
-    // Função para exibir informações detalhadas do evento e oferecer opção de deletar
+    // Função para exibir informações detalhadas do evento e deletar
     async function handleEventClick(clickInfo) {
       const eventId = clickInfo.event.id;
-      const event = currentEvents.value.find(e => e.id === eventId);
+      const event = currentEvents.value.find((e) => e.id === eventId);
 
       if (!event) {
-        alert("Evento não encontrado.");
+        alert('Evento não encontrado.');
         return;
       }
 
-      if (!event.available && event.clientId) {
-        const clientData = await fetchClientData(event.clientId);
-        const petData = await fetchPetData(event.clientId, event.petId);
-        if (clientData && petData) {
-          const details = `
-Cliente: ${clientData.firstName} ${clientData.lastName}
-Animal: ${petData.name} | Espécie: ${petData.species} | Condição: ${petData.conditions || "Não especificado"}
-Serviço: ${event.service || event.title}
-Horário: ${event.start} até ${event.end}
-          `;
-          const deleteConfirmed = confirm(`Detalhes da Consulta:\n\n${details}\n\nDeseja excluir este evento?`);
-          
-          if (deleteConfirmed) {
-            await deleteEvent(eventId, clickInfo);
-          }
-        } else {
-          alert("Dados do cliente ou do animal não encontrados.");
-        }
-      } else if (event.available) {
-        const deleteConfirmed = confirm(`Horário de disponibilidade: ${event.start} até ${event.end}\n\nDeseja excluir este evento?`);
-        
-        if (deleteConfirmed) {
-          await deleteEvent(eventId, clickInfo);
-        }
+      const deleteConfirmed = confirm(`Deseja excluir o evento ${event.title}?`);
+      if (deleteConfirmed) {
+        await deleteEvent(eventId, clickInfo);
       }
     }
 
-    // Função para excluir um evento do Firestore e do calendário
+    // Função para excluir eventos
     async function deleteEvent(eventId, clickInfo) {
       const eventRef = doc(db, `users/${medicoId.value}/events`, eventId);
       try {
         await deleteDoc(eventRef);
         clickInfo.event.remove();
-        currentEvents.value = currentEvents.value.filter(event => event.id !== eventId);
+        currentEvents.value = currentEvents.value.filter((event) => event.id !== eventId);
       } catch (error) {
-        console.error("Erro ao excluir o evento:", error);
+        console.error('Erro ao excluir o evento:', error);
       }
     }
 
-    // Função para buscar a disponibilidade e consultas do Firestore
+    // Função para carregar eventos do Firestore
     async function fetchAvailability() {
       currentEvents.value = [];
 
       const eventsRef = collection(db, `users/${medicoId.value}/events`);
       const querySnapshot = await getDocs(eventsRef);
+
       for (const docSnapshot of querySnapshot.docs) {
         const eventData = docSnapshot.data();
         eventData.id = docSnapshot.id;
-
-        if (!eventData.available && eventData.clientId) {
-          const clientData = await fetchClientData(eventData.clientId);
-          const petData = await fetchPetData(eventData.clientId, eventData.petId);
-          if (clientData && petData) {
-            eventData.title = `Cliente: ${clientData.firstName} ${clientData.lastName} | Animal: ${petData.name} | Serviço: ${eventData.service || eventData.title}`;
-            eventData.color = '#ff9f89';
-          }
-        }
 
         currentEvents.value.push(eventData);
       }
 
       calendarOptions.value.events = [...currentEvents.value];
-    }
-
-    // Função para buscar os dados do cliente no Firestore usando o ID do cliente
-    async function fetchClientData(clientId) {
-      try {
-        const clientRef = doc(db, 'users', clientId);
-        const clientSnapshot = await getDoc(clientRef);
-        if (clientSnapshot.exists()) {
-          const clientData = clientSnapshot.data();
-          return {
-            firstName: clientData.firstName,
-            lastName: clientData.lastName,
-          };
-        } else {
-          console.error(`Cliente com ID ${clientId} não encontrado`);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar os dados do cliente:", error);
-      }
-      return null;
-    }
-
-    // Função para buscar os dados do animal na coleção 'pets' usando o ownerId e petId
-    async function fetchPetData(ownerId, petId) {
-      try {
-        const petRef = doc(db, 'pets', petId);
-        const petSnapshot = await getDoc(petRef);
-
-        if (petSnapshot.exists() && petSnapshot.data().ownerId === ownerId) {
-          return petSnapshot.data();
-        } else {
-          console.error(`Animal com ownerId ${ownerId} e petId ${petId} não encontrado`);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar os dados do animal:", error);
-      }
-      return null;
     }
 
     onMounted(fetchAvailability);
@@ -200,22 +153,44 @@ Horário: ${event.start} até ${event.end}
 </script>
 
 <style scoped>
+/* Container principal do calendário */
 .agenda-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: auto;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.fc .fc-event-title {
-  white-space: normal;
+/* Estilização dos eventos no calendário */
+.fc .fc-event {
+  background-color: #88e1ff !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-size: 0.9em;
+  border-radius: 4px;
 }
 
-.fc .fc-event {
-  font-size: 0.9em;
-  padding: 5px;
-  border-radius: 5px;
+/* Título dos eventos */
+.fc .fc-event-title {
+  font-weight: bold;
+}
+
+/* Customizações gerais do FullCalendar */
+.fc-toolbar-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.fc .fc-button {
+  background-color: #4a7c59;
+  color: white !important;
+  border-radius: 4px;
+}
+
+.fc .fc-button:hover {
+  background-color: #36743a;
+  color: white !important;
 }
 </style>

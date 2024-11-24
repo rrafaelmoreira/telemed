@@ -18,6 +18,7 @@ export const INITIAL_EVENTS = [
     start: new Date().toISOString(), // Data e hora de início do evento, no formato ISO.
     duration: { hours: 2 } // Duração do evento, especificada em horas.
   },
+  
   // Adicione mais eventos iniciais conforme necessário.
   // Exemplo:
   // { id: createEventId(), title: 'Vacinação', start: new Date(Date.now() + 86400000).toISOString(), duration: { hours: 1 } }
