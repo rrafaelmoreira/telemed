@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <!-- Exibe o HeaderComponent apenas quando o usuário está autenticado e não está na página de login -->
 
     <!-- Área principal para o conteúdo da aplicação -->
     <router-view></router-view>
@@ -27,6 +26,7 @@ export default {
         if (user) {
           isAuthenticated.value = true; // Usuário autenticado
           console.log("Usuário autenticado:", user);
+          router.push("/home"); // Redireciona para a página inicial
         } else {
           isAuthenticated.value = false; // Usuário não autenticado
           if (route.path !== "/login") {

@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
-
-import LoginPage from '../components/LoginPage.vue';
-import RegisterPage from '../components/RegisterPage.vue';
 import { getAuth } from 'firebase/auth';
-import DoctorPatients from '@/components/DoctorPatients.vue';
+
+import LoginPage from '@/components/LoginPage.vue';
+import RegisterPage from '@/components/RegisterPage.vue';
+import HomepageComponent from '@/components/HomepageComponent.vue';
+import DoctorProfile from '@/components/DoctorProfile.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
-  { path: '/dashboard', name: 'Dashboard', component: DoctorPatients },
   { path: '/login', name: 'Login', component: LoginPage, meta: { hideHeader: true } },
   { path: '/register', name: 'Register', component: RegisterPage, meta: { hideHeader: true } },
+  { path: '/home', name: 'Home', component: HomepageComponent },
+  { path: '/perfil-medico', name: 'DoctorProfile', component: DoctorProfile },
 
   // Adicionando a rota para Home
 ];

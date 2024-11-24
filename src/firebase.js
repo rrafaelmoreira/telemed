@@ -33,9 +33,5 @@ onAuthStateChanged(auth, user => {
 });
 
 
-
-
-
-
 // Exporta as instâncias para serem usadas em outros arquivos
 export { auth, db };
