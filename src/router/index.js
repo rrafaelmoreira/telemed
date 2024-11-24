@@ -5,6 +5,7 @@ import LoginPage from '@/components/LoginPage.vue';
 import RegisterPage from '@/components/RegisterPage.vue';
 import HomepageComponent from '@/components/HomepageComponent.vue';
 import DoctorProfile from '@/components/DoctorProfile.vue';
+import DoctorAgenda from '@/components/DoctorAgenda.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -12,6 +13,8 @@ const routes = [
   { path: '/register', name: 'Register', component: RegisterPage, meta: { hideHeader: true } },
   { path: '/home', name: 'Home', component: HomepageComponent },
   { path: '/perfil-medico', name: 'DoctorProfile', component: DoctorProfile },
+  { path: '/agenda', name: 'DoctorAgenda', component: DoctorAgenda },
+
 
   // Adicionando a rota para Home
 ];

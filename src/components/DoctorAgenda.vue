@@ -11,6 +11,7 @@ import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import allLocales from '@fullcalendar/core/locales-all';
 import { db } from '@/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -21,13 +22,17 @@ export default {
   },
   setup() {
     const calendarOptions = ref({
+      themeSystem: 'bootstrap5',
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       initialView: 'timeGridWeek',
+      locales: allLocales,
+      locale: 'pt-br',
       headerToolbar: {
-        left: 'prev,next today',
+        left: 'prev next today',
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,timeGridDay',
       },
+      titleFormat: { year: 'numeric', month: '2-digit', day: '2-digit' },
       selectable: true,
       editable: true,
       eventClick: handleEventClick,
@@ -35,7 +40,8 @@ export default {
       events: [],
       slotDuration: '00:30:00',
       slotLabelInterval: '01:00:00',
-      expandRows: true,
+      expandRows: false,
+
     });
     
     const currentEvents = ref([]);

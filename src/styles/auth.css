@@ -1,3 +1,11 @@
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #B2DBD3, #4A7C59);
+  height: 110vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .logcad-container {
   background-color: #ffffff;
   padding: 2rem;

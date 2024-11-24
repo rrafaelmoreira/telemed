@@ -4,7 +4,7 @@
     <HeaderComponent />
 
     <!-- Perfil do Médico -->
-    <section class="medico-apresentacao bg-light">
+    <section class="medico-apresentacao bg-light rounded-4">
       <div class="container-fluid py-5">
         <div class="row">
           <!-- Card Principal: Informações e Apresentação -->
@@ -165,7 +165,6 @@ body {
 }
 
 .medico-apresentacao {
-  min-height: 100vh;
   background-color: #f8f9fa;
 }
 
