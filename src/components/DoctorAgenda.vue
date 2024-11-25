@@ -8,10 +8,12 @@
     <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
+          
           <div class="modal-header">
             <h5 class="modal-title" id="addEventModalLabel">Adicionar disponibilidade</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+
           <div class="modal-body">
             <!-- Formulário para criar evento -->
             <form @submit.prevent="addEvent">
@@ -84,10 +86,10 @@ export default {
       titleFormat: { year: "numeric", month: "2-digit", day: "2-digit" },
       events: [], // Eventos adicionados aparecerão aqui
       allDaySlot: false, // Remove o campo "dia inteiro"
+      weekends: false, // Remove o campo "domingo"
       slotDuration: "01:00:00", // Intervalos de 1 hora
       slotLabelInterval: "01:00:00", // Exibir rótulos a cada 1 hora
-      start: "08:00:00", // Horário inicial do calendário
-      end: "18:00:00", // Horário final do calendário
+
     });
 
     const newEvent = ref({

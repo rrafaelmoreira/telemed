@@ -6,10 +6,10 @@
     <!-- Perfil do Médico -->
     <section class="medico-apresentacao bg-light rounded-4">
       <div class="container-fluid py-5">
-        <div class="row">
+        <div class="row g-4">
           <!-- Card Principal: Informações e Apresentação -->
           <div class="col-md-6">
-            <div class="card shadow-sm border-0 mx-auto h-100">
+            <div class="card shadow-sm border-0 h-100">
               <div class="card-body">
                 <div class="row align-items-center">
                   <!-- Foto do Médico -->
@@ -25,67 +25,56 @@
 
                   <!-- Informações do Médico -->
                   <div class="col-md-9">
-                    <h3 class="fw-bold text-start">Dr. Renato Capeci</h3>
-                    <div class="row">
-                      <div class="col">
-                        <p class="text-muted mb-1 text-start">
-                          Médico Cardiologista
-                        </p>
-                      </div>
-                      <div class="col">
-                        <p class="text-muted mb-0 text-start">CRMV: 123456</p>
-                      </div>
-                    </div>
+                    <h3 class="fw-bold text-start">Dr. Nome do Médico</h3>
+                    <p class="text-muted mb-0 text-start">CRMV: 123456</p>
                   </div>
                 </div>
-              </div>
-              <hr />
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-12">
+                <hr />
+
+                <!-- Apresentação -->
+                <div class="section-content">
+                  <div class="d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold text-start">Apresentação</h5>
-                    <p class="text-start">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      Nulla nec purus feugiat, vestibulum mi nec, ultricies
-                      metus. Sed at metus lacinia, aliquet arcu porttitor.
-                    </p>
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      @click="openModal('apresentacao')"
+                    >
+                      Editar
+                    </button>
                   </div>
+                  <p class="text-start mt-2">{{ apresentacao }}</p>
                 </div>
-                <hr>
-                <div class="row">
-                <div class="col-12">
-                  <h5 class="fw-bold text-start">Formação</h5>
+                <hr />
+
+                <!-- Formação -->
+                <div class="section-content">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-start">Formação</h5>
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      @click="openModal('formacao')"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                  <ul class="list-unstyled mt-2">
+                    <li
+                      v-for="(formacao, index) in formacoes"
+                      :key="index"
+                      class="d-flex align-items-center"
+                    >
+                      <i class="bi bi-circle-fill text-primary me-2"></i>
+                      {{ formacao }}
+                    </li>
+                  </ul>
                 </div>
               </div>
-              </div>
-             
-              
-              <!-- Formação -->
-            <div class="card shadow-sm border-0 mx-auto mb-4">
-              <div class="card-body">
-                <h5 class="fw-bold">Formação</h5>
-                <ul class="list-unstyled">
-                  <li>
-                    <i class="bi bi-circle-fill text-primary me-2"></i>
-                    Medicina - USP (2004)
-                  </li>
-                  <li>
-                    <i class="bi bi-circle-fill text-primary me-2"></i>
-                    Residência em Cardiologia - Hospital das Clínicas (2008)
-                  </li>
-                  <li>
-                    <i class="bi bi-circle-fill text-primary me-2"></i>
-                    Especialização em Arritmias Cardíacas (2012)
-                  </li>
-                </ul>
-              </div>
-            </div>
             </div>
           </div>
 
           <!-- Card Secundário: Horários Disponíveis -->
           <div class="col-md-6">
-            <div class="card shadow-sm border-0 mx-auto h-100">
+            <div class="card shadow-sm border-0 h-100">
               <div class="card-body">
                 <DoctorAgenda />
               </div>
@@ -94,7 +83,40 @@
         </div>
       </div>
     </section>
+
+    
+    <!-- Modal para edição -->
+    <div v-if="isModalOpen" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="modal-title">
+              <h5>{{ modalTitle }}</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+   <!-- <div v-if="isModalOpen" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h5>{{ modalTitle }}</h5>
+          <button @click="closeModal" class="btn-close">X</button>
+        </div>
+        <div class="modal-body">
+          <textarea v-model="modalContent" class="form-control" rows="5"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="closeModal">Cancelar</button>
+          <button class="btn btn-primary" @click="saveChanges">Salvar</button>
+        </div>
+      </div>
+    </div>
+    -->
   </div>
+
 </template>
 
 <script>
@@ -108,19 +130,42 @@ export default {
   },
   data() {
     return {
-      newSchedule: "", // Campo para o novo horário
-      schedules: [], // Lista de horários disponíveis
+      apresentacao:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec purus feugiat, vestibulum mi nec, ultricies metus.",
+      formacoes: [
+        "Medicina - USP (2004)",
+        "Residência em Cardiologia - Hospital das Clínicas (2008)",
+        "Especialização em Arritmias Cardíacas (2012)",
+      ],
+      modalTitle: "",
+      modalContent: "",
+      modalTarget: "",
+      isModalOpen: false, // Controle para abrir e fechar o modal
     };
   },
   methods: {
-    addSchedule() {
-      if (this.newSchedule) {
-        this.schedules.push(this.newSchedule); // Adiciona o novo horário à lista
-        this.newSchedule = ""; // Limpa o campo após adicionar
+    openModal(target) {
+      if (target === "apresentacao") {
+        this.modalTitle = "Editar Apresentação";
+        this.modalContent = this.apresentacao;
+        this.modalTarget = "apresentacao";
+      } else if (target === "formacao") {
+        this.modalTitle = "Editar Formação";
+        this.modalContent = this.formacoes.join("\n");
+        this.modalTarget = "formacao";
       }
+      this.isModalOpen = true;
     },
-    removeSchedule(index) {
-      this.schedules.splice(index, 1); // Remove o horário da lista
+    closeModal() {
+      this.isModalOpen = false;
+    },
+    saveChanges() {
+      if (this.modalTarget === "apresentacao") {
+        this.apresentacao = this.modalContent;
+      } else if (this.modalTarget === "formacao") {
+        this.formacoes = this.modalContent.split("\n").filter((line) => line);
+      }
+      this.closeModal();
     },
   },
 };
@@ -145,7 +190,35 @@ img {
   border: 3px solid #eaeaea;
 }
 
-button {
-  font-size: 0.9rem;
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 </style>
