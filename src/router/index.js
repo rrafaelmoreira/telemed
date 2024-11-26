@@ -5,18 +5,28 @@ import LoginPage from '@/components/LoginPage.vue';
 import RegisterPage from '@/components/RegisterPage.vue';
 import HomepageComponent from '@/components/HomepageComponent.vue';
 import DoctorProfile from '@/components/DoctorProfile.vue';
-import DoctorConsultations from '@/components/DoctorConsultations.vue';
+import DoctorList from '@/components/DoctorList.vue';
+import DoctorPatients from '../components/DoctorPatients.vue';
+import DoctorConsultations from '../components/DoctorConsultations.vue';
+import DoctorSettings from '../components/DoctorSettings.vue';
+import DoctorMeet from '@/components/DoctorMeet.vue';
+import PetOwnerProfile from '@/components/PetOwnerProfile.vue';
+import DoctorSchedule from '@/components/DoctorSchedule.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'Login', component: LoginPage, meta: { hideHeader: true } },
   { path: '/register', name: 'Register', component: RegisterPage, meta: { hideHeader: true } },
   { path: '/home', name: 'Home', component: HomepageComponent },
-  { path: '/perfil-medico', name: 'DoctorProfile', component: DoctorProfile },
-  { path: '/consultas', name: 'DoctorConsultations', component: DoctorConsultations },
+  { path: '/perfil-medico', name: 'DrProfile', component: DoctorProfile },
+  { path: '/lista-medicos', name: 'DrList', component: DoctorList },
+  { path: '/pacientes', name: 'DrPatients', component: DoctorPatients },
+  { path: '/consultations', name: 'DrConsultations', component: DoctorConsultations },
+  { path: '/settings', name: 'DrSettings', component: DoctorSettings },
+  { path: '/criar-reuniao', name: 'DrMeet', component: DoctorMeet },
+  { path: '/medico-agenda/:medicoId', name: 'DrSchedule', component: DoctorSchedule },
+  { path: '/perfil-cliente', name: 'PtProfile', component: PetOwnerProfile },
 
-
-  // Adicionando a rota para Home
 ];
 
 // Criando a constante auth para verificar se o usuário está logado ou não  
