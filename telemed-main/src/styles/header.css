@@ -1,0 +1,34 @@
+.navbar {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.navbar-brand img {
+  border-radius: 50%;
+}
+
+.navbar-toggler {
+  border: none;
+}
+
+.navbar-nav .nav-link {
+  margin-right: 15px;
+}
+
+.navbar-nav .btn-outline-danger {
+  padding: 5px 10px;
+  font-size: 0.85rem;
+}
+
+.nav-item p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center;
+  }
+  .navbar-nav .nav-link {
+    margin: 10px 0;
+  }
+}
