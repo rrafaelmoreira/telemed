@@ -77,12 +77,51 @@ export default {
 </script>
 
 <style scoped>
-body {
-  font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #B2DBD3, #4A7C59);
-  height: 110vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.logcad-container {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  width: 28rem;
 }
+
+.icon-container img {
+  display: block;
+  margin: 0 auto 1rem;
+  width: 80px;
+}
+.logcad-header {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: #4A7C59; /* Verde escuro */
+}
+.logcad-input {
+  border-radius: 10px;
+  padding: 0.8rem;
+  font-size: 1rem;
+}
+.logcad-input:focus {
+  outline: none;
+  border-color: #88BDBC; /* Verde suave */
+  box-shadow: 0 0 4px rgba(136, 189, 188, 0.4);
+}
+
+
+.forgot-password,
+.create-account {
+  color: #4A7C59; /* Verde escuro */
+  font-weight: 600;
+}
+
+.forgot-password:hover,
+.create-account:hover {
+  text-decoration: underline;
+}
+
+.txt_cadlog {
+  font-weight: bold;
+  color: #4A7C59;
+}
+
 </style>

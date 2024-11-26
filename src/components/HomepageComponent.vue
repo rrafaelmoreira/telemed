@@ -109,7 +109,7 @@ export default {
 /* Estilos para o banner */
 .banner-section {
     position: relative;
-    width: 100vw;
+    width: 99.2vw;
     overflow: hidden;
 }
 

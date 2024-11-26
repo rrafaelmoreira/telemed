@@ -23,10 +23,6 @@
                             <small class="text-muted">{{ user.email }}</small>
                         </li>
 
-                        <!-- Links de navegação -->
-                        <li class="nav-item">
-                            <router-link to="/agenda" class="nav-link">Agenda</router-link>
-                        </li>
                         <li class="nav-item">
                             <router-link :to="userType === 'medico' ? '/perfil-medico' : '/perfil-cliente'"
                                 class="nav-link">

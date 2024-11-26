@@ -2,14 +2,13 @@
   <div>
     <!-- Header -->
     <HeaderComponent />
-
     <!-- Perfil do Médico -->
     <section class="medico-apresentacao bg-light rounded-4">
       <div class="container-fluid py-5">
-        <div class="row g-4">
+        <div class="row">
           <!-- Card Principal: Informações e Apresentação -->
           <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 mx-auto h-100">
               <div class="card-body">
                 <div class="row align-items-center">
                   <!-- Foto do Médico -->
@@ -26,55 +25,63 @@
                   <!-- Informações do Médico -->
                   <div class="col-md-9">
                     <h3 class="fw-bold text-start">Dr. Nome do Médico</h3>
-                    <p class="text-muted mb-0 text-start">CRMV: 123456</p>
+                    <div class="row">
+                      <div class="col">
+                        <p class="text-muted mb-1 text-start">
+                          Médico Cardiologista
+                        </p>
+                      </div>
+                      <div class="col">
+                        <p class="text-muted mb-0 text-start">CRMV: 123456</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <hr />
+            
 
-                <!-- Apresentação -->
-                <div class="section-content">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold text-start">Apresentação</h5>
-                    <button
-                      class="btn btn-sm btn-outline-primary"
-                      @click="openModal('apresentacao')"
-                    >
-                      Editar
-                    </button>
-                  </div>
-                  <p class="text-start mt-2">{{ apresentacao }}</p>
+              <!-- Apresentação -->
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="fw-bold text-start">Apresentação</h5>
+                 
                 </div>
+                <p class="text-start">
+                  {{ apresentacao }}
+                </p>
+                <button
+                    class="btn btn-sm btn-outline-primary text-start"
+                    @click="openModal('apresentacao')"
+                  >
+                    Editar
+                  </button>
                 <hr />
+              </div>
 
-                <!-- Formação -->
-                <div class="section-content">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold text-start">Formação</h5>
-                    <button
-                      class="btn btn-sm btn-outline-primary"
-                      @click="openModal('formacao')"
-                    >
-                      Editar
-                    </button>
-                  </div>
-                  <ul class="list-unstyled mt-2">
-                    <li
-                      v-for="(formacao, index) in formacoes"
-                      :key="index"
-                      class="d-flex align-items-center"
-                    >
-                      <i class="bi bi-circle-fill text-primary me-2"></i>
-                      {{ formacao }}
-                    </li>
-                  </ul>
+              <!-- Formação -->
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="fw-bold text-start">Formação</h5>
+                  
                 </div>
+                <ul class="list-unstyled">
+                  <li class="text-start" v-for="(formacao, index) in formacoes" :key="index">
+                    <i class="bi bi-circle-fill text-primary me-2"></i>
+                    {{ formacao }}
+                  </li>
+                </ul>
+                <button
+                    class="btn btn-sm btn-outline-primary"
+                    @click="openModal('formacao')">
+                    Editar
+                  </button>
               </div>
             </div>
           </div>
-
+  </div>
           <!-- Card Secundário: Horários Disponíveis -->
           <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 mx-auto h-100">
               <div class="card-body">
                 <DoctorAgenda />
               </div>
@@ -84,39 +91,29 @@
       </div>
     </section>
 
-    
     <!-- Modal para edição -->
-    <div v-if="isModalOpen" class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <div class="modal-title">
-              <h5>{{ modalTitle }}</h5>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-   <!-- <div v-if="isModalOpen" class="modal-overlay">
+    <div v-if="isModalOpen" class="modal-overlay modal">
       <div class="modal-container">
         <div class="modal-header">
           <h5>{{ modalTitle }}</h5>
           <button @click="closeModal" class="btn-close">X</button>
         </div>
         <div class="modal-body">
-          <textarea v-model="modalContent" class="form-control" rows="5"></textarea>
+          <textarea
+            v-model="modalContent"
+            class="form-control"
+            rows="5"
+          ></textarea>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" @click="closeModal">Cancelar</button>
-          <button class="btn btn-primary" @click="saveChanges">Salvar</button>
+          <button class="btn btn-primary" @click="saveChanges">
+            Salvar
+          </button>
         </div>
       </div>
     </div>
-    -->
   </div>
-
 </template>
 
 <script>
@@ -172,13 +169,9 @@ export default {
 </script>
 
 <style scoped>
-body {
-  font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #b2dbd3, #4a7c59);
-}
-
 .medico-apresentacao {
   background-color: #f8f9fa;
+  min-width: 80vw;
 }
 
 .card {

@@ -49,12 +49,68 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal para remover evento -->
+    <div class="modal fade" id="removeEventModal" tabindex="-1" aria-labelledby="removeEventModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEventModalLabel">Remover disponibilidade</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <!-- Formulário para criar evento -->
+            <form @submit.prevent="removeEvent">
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <p for="eventDate" class="form-label">Data:</p>
+                </div>
+                <div class="col-md-10">
+                  <input type="date" v-model="newEvent.date" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <p for="startTime" class="form-label">Início:</p>
+                </div>
+                <div class="col-md-10">
+                  <input type="time" v-model="newEvent.startTime" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <p for="endTime" class="form-label">Término:</p>
+                </div>
+                <div class="col-md-10">
+                  <input type="time" v-model="newEvent.endTime" class="form-control" required />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-gradient w-100 logcad-button">Salvar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     <br>
     
     <!-- Botão para abrir o modal -->
-    <button type="button" class="btn btn-gradient w-100 logcad-button" data-bs-toggle="modal" data-bs-target="#addEventModal">
-      Adicionar Disponibilidade
-    </button>
+     <div class="row">
+      <div class="col-md-6">
+        <button type="button" class="btn btn-gradient w-100 logcad-button" data-bs-toggle="modal" data-bs-target="#addEventModal">
+          Adicionar Disponibilidade
+        </button>
+      </div>
+      <div class="col-md-6">
+        <button type="button" class="btn btn-gradient w-100 logcad-button" data-bs-toggle="modal" data-bs-target="#removeEventModal">
+          Remover Disponibilidade
+        </button>
+      </div>
+     </div>
+
   </div>
 
 </template>
