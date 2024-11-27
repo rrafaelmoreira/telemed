@@ -1,11 +1,18 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   font-family: "Poppins", sans-serif;
   background: linear-gradient(135deg, #B2DBD3, #4A7C59);
-  height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  height: 110vh; /* Garante altura total da tela */
 }
+
 
 .btn-gradient {
   background: linear-gradient(135deg, #4A7C59, #375A4C);
@@ -16,10 +23,12 @@ body {
   border: none;
   border-radius: 8px;
   transition: 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn-gradient:hover {
   background: linear-gradient(135deg, #375A4C, #2C4739);
   cursor: pointer;
   color: #ffffff;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }

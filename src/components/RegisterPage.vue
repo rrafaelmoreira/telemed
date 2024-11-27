@@ -11,7 +11,7 @@
           <div class="col-md-6">
             <p class="text-start txt_cadlog">Perfil</p>
             <select v-model="userType" class="form-select logcad-input">
-              <option value="cliente">Tutor</option>
+              <option value="tutor">Tutor</option>
               <option value="medico">Veterinário</option>
             </select>
           </div>
@@ -85,7 +85,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 export default {
   data() {
     return {
-      userType: "cliente",
+      userType: "tutor",
       email: "",
       fullName: "",
       socialName: "",
