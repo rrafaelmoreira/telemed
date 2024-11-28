@@ -47,13 +47,16 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle";
 import FullCalendar from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import allLocales from "@fullcalendar/core/locales-all";
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore"; // Funções do Firestore
+import { db } from "@/firebase";
+import { getAuth } from "firebase/auth";
 
 export default {
   components: { FullCalendar },
@@ -82,9 +85,35 @@ export default {
       endTime: "",
     });
 
-    const currentEventId = ref(null);
+    const currentEventId = ref([]);
     const isCreatingEvent = ref(true);
+    const medicoId = ref(getAuth().currentUser ? getAuth().currentUser.uid : null);
     const modalTitle = ref("");
+
+    if (!medicoId.value) {
+      console.error("Usuário não autenticado");
+      return;
+    }
+
+    // Função para buscar os eventos do Firestore e exibir no calendário
+    async function fetchEvents() {
+      const eventsRef = collection(db, `users/${medicoId.value}/events`);
+      const querySnapshot = await getDocs(eventsRef);
+      
+      const events = querySnapshot.docs.map(doc => {
+        const event = doc.data();
+        event.id = doc.id; // Adicionando o ID do documento do Firestore ao evento
+        return event;
+      });
+
+      // Atualiza os eventos no calendário
+      calendarOptions.value.events = events;
+    }
+
+    // Chama a função ao montar o componente para carregar os eventos
+    onMounted(() => {
+      fetchEvents();
+    });
 
     // Abrir modal para criar evento
     function handleDateSelect(selectInfo) {
@@ -112,33 +141,60 @@ export default {
       modal.show();
     }
 
-    // Adicionar evento ao calendário
-    function addEvent() {
+    // Adicionar evento ao Firestore e ao calendário
+    async function addEvent() {
       const { date, startTime, endTime } = newEvent.value;
-
       const start = `${date}T${startTime}:00`;
       const end = `${date}T${endTime}:00`;
 
       const event = {
-        id: Date.now().toString(), // ID único para identificação
         title: "Disponível",
         start,
         end,
         color: "#88e1ff",
+        available: true,
       };
 
-      calendarOptions.value.events.push(event);
+      const eventsRef = collection(db, `users/${medicoId.value}/events`);
 
-      newEvent.value = { date: "", startTime: "", endTime: "" };
-      closeModal();
+      try {
+        // Adiciona o evento ao Firestore
+        const docRef = await addDoc(eventsRef, event);
+
+        // Atualiza o ID do evento com o ID gerado pelo Firestore
+        event.id = docRef.id;
+
+        // Adiciona o evento ao calendário local
+        calendarOptions.value.events.push(event);
+
+        // Limpa os campos de entrada do evento
+        newEvent.value = { date: "", startTime: "", endTime: "" };
+
+        // Fecha o modal
+        closeModal();
+      } catch (error) {
+        console.error("Erro ao adicionar evento:", error);
+      }
     }
 
-    // Excluir evento do calendário
-    function deleteEvent() {
-      calendarOptions.value.events = calendarOptions.value.events.filter(
-        (event) => event.id !== currentEventId.value
-      );
-      closeModal();
+    // Excluir evento do Firestore e do calendário
+    async function deleteEvent() {
+      const eventRef = doc(db, `users/${medicoId.value}/events`, currentEventId.value);
+      
+      try {
+        // Exclui o evento do Firestore
+        await deleteDoc(eventRef);
+
+        // Remove o evento do calendário
+        calendarOptions.value.events = calendarOptions.value.events.filter(
+          (event) => event.id !== currentEventId.value
+        );
+
+        // Fecha o modal após excluir
+        closeModal();
+      } catch (error) {
+        console.error("Erro ao excluir evento:", error);
+      }
     }
 
     // Fechar modal
@@ -159,6 +215,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .agenda-container {

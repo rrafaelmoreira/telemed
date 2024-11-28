@@ -1,0 +1,30 @@
+.btn-gradient {
+  background: linear-gradient(135deg, #4A7C59, #375A4C);
+  color: #ffffff;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #375A4C, #2C4739);
+  cursor: pointer;
+  color: #ffffff;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #4A7C59;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

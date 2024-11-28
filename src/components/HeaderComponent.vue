@@ -39,10 +39,10 @@
                         </li>
 
                         <!-- Links específicos para Clientes -->
-                        <li v-if="userType === 'tutor'" class="nav-item">
+                        <li v-if="userType === 'cliente'" class="nav-item">
                             <router-link to="/pets" class="nav-link">Meus pets</router-link>
                         </li>
-                        <li v-if="userType === 'tutor'" class="nav-item">
+                        <li v-if="userType === 'cliente'" class="nav-item">
                             <router-link to="/lista-medicos" class="nav-link">Veterinários Disponíveis</router-link>
                         </li>
 

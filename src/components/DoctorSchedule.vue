@@ -12,7 +12,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { db } from '@/firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 export default {
@@ -57,15 +57,22 @@ export default {
         const eventData = docSnapshot.data();
         eventData.id = docSnapshot.id;
 
+        // Converte start e end para objetos Date
+        eventData.start = new Date(eventData.start);
+        eventData.end = new Date(eventData.end);
+
+        // Verifica se o evento é de disponibilidade
         if (eventData.available) {
-          disponibilidade.value.push(eventData);
+          disponibilidade.value.push(eventData); // Adiciona eventos de disponibilidade
         } else {
-          consultas.value.push(eventData);
+          consultas.value.push(eventData); // Adiciona eventos de consulta
         }
 
+        // Adiciona todos os eventos ao array de currentEvents
         currentEvents.value.push(eventData);
       });
 
+      // Atualiza a lista de eventos no calendário
       calendarOptions.value.events = [...currentEvents.value];
     }
 
@@ -74,8 +81,7 @@ export default {
       if (!clientId.value) return [];
       
       const petsRef = collection(db, 'pets');
-      const petsQuery = query(petsRef, where('ownerId', '==', clientId.value));
-      const petsSnapshot = await getDocs(petsQuery);
+      const petsSnapshot = await getDocs(petsRef);
       return petsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 
@@ -196,8 +202,8 @@ Digite o número correspondente à opção de consulta:
       // Cria o novo evento da consulta com o ID do cliente, tipo de serviço e animal selecionado
       const newEvent = {
         title: `${title} - ${selectedPet.name} (${selectedPet.species})`,
-        start,
-        end,
+        start: new Date(start), // Converte para objeto Date
+        end: new Date(end), // Converte para objeto Date
         color: '#ff9f89',
         available: false,
         clientId: clientId.value, // Salva o ID do cliente autenticado

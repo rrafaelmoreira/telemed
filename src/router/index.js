@@ -24,7 +24,7 @@ const routes = [
   { path: '/consultations', name: 'DrConsultations', component: DoctorConsultations },
   { path: '/settings', name: 'DrSettings', component: DoctorSettings },
   { path: '/criar-reuniao', name: 'DrMeet', component: DoctorMeet },
-  { path: '/medico-agenda/:medicoId', name: 'DrSchedule', component: DoctorSchedule },
+  { path: '/medico-agenda/:medicoId', name: 'verAgenda', component: DoctorSchedule },
   { path: '/perfil-cliente', name: 'PtProfile', component: PetOwnerProfile },
 
 ];
